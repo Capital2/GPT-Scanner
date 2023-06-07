@@ -2,6 +2,11 @@ from fake_useragent import UserAgent
 import requests
 # import cloudscraper
 
+"""
+IP ban after 7 requests each hour
+"""
+
+
 # scraper = cloudscraper.create_scraper()
 
 scraper = requests.session()
@@ -21,7 +26,7 @@ headers = {
 }
 
 data = {
-    "document": "Hannibal of Carthage was a highly respected military general and statesman who commanded the forces of Carthage in their fight against the Roman Republic during the Second Punic War [8]. He was born into a period of great tension in the Mediterranean Basin, with Carthaginians seeking revenge against Rome after their defeat in the First Punic War. Hannibal is widely regarded as one of the greatest military commanders in history, known for his ability to determine his and his opponent's strengths and weaknesses and plan battles accordingly. He was also distinguished for his well-planned strategies and ability to conquer and ally with several Italian cities. Hannibal won several victories against Rome, including at the battles of Trebia, Lake Trasimene, and Cannae, inflicting heavy losses on the Romans. However, despite his best efforts, he was unable to win a decisive victory and was eventually forced to flee into exile. Hannibal is considered one of the greatest military tacticians and generals of antiquity, alongside other greats such as Julius Caesar and Alexander the Great.",
+    "document": "My life is quite boring to be honest. Every morning I wake up and do the same thing over again-turn off my beeping alarm clock, force myself out of bed, take a quick shower, change into my scrubs and rush out the house to the hospital. I Work there for what feels like forever, and come back home to sleep and redo everything over again. My life wasn't very exciting but I loved my job as a nurse. Being able to take care of people who need help  has always been something I enjoyed doing. I sometimes believe it's because I've been taking care of people my whole life. When I was around 13, I had to take care of both my mother and little sister. My father left after my little sister was born, I never knew him well and my mother had been diagnosed with lung cancer. It wasn't easy for me but I got used to it. My mother passed away when I was 18 and was left alone with my sister to take care of. ",
 }
 r = scraper.post(url="https://api.gptzero.me/v2/predict/text",headers=headers, json=data)
 
