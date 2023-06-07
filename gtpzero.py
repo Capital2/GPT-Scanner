@@ -1,9 +1,10 @@
-from uuid import uuid4
 from fake_useragent import UserAgent
-import cloudscraper
+import requests
+# import cloudscraper
 
-scraper = cloudscraper.create_scraper()
+# scraper = cloudscraper.create_scraper()
 
+scraper = requests.session()
 headers = {
             'authority': 'https://gptzero.me/',
             'accept': 'text/event-stream',
