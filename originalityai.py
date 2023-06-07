@@ -2,7 +2,7 @@ import requests
 
 """
     requires an account 5addem pymailtm
-    every account has 50 credits
+    every account has 50 credits if mail is verified
 """
 
 data = {

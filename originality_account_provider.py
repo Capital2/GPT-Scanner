@@ -19,7 +19,7 @@ headers = {
             'user-agent': UserAgent().random,
 }
 
-data = {"name":"omnirasputineee","email":"ozmqcjui@internetkeno.com","password":"heyyeyeyyha551AB","captcha":"null"}
+data = {"name":"holyhellthisisau","email":"bvyogl@internetkeno.com","password":"heyyeyeyyha551AB","captcha":"null"}
 
 r = scraper.post(url="https://core.originality.ai/api/user/register",headers=headers, json=data)
 
