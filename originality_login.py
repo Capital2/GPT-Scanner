@@ -1,9 +1,8 @@
-# we can use mechanize here?
 
 from fake_useragent import UserAgent
 import requests
 
-scraper = requests.session()
+client = requests.session()
 headers = {
             'authority': 'core.originality.ai',
             'accept': 'application/json, text/plain, */*',
@@ -19,15 +18,14 @@ headers = {
             'user-agent': UserAgent().random,
 }
 
-data = {"name":"holynevilemo","email":"8hpfb7cp8bvr1jjo90yhrwy5@getsingspiel.com","password":"heyyeyeyyha551ABqsd","captcha":"null"}
+data = {"email":"u15cfhvtf6qqn4f6dxyvble7@getsingspiel.com","password":"heyyeyeyyha551ABqsd","captcha":"null"}
 
-r = scraper.post(url="https://core.originality.ai/api/user/register", json=data)
+r = client.post(url="https://core.originality.ai/api/user/login", json=data)
+
+token = r.json()["auth_data"]["access_token"]
+client.headers.update({
+    "Authorization": f"Bearer {token}"
+})
+r = client.post("https://core.originality.ai/api/user/apiKeys/create")
 
 print(r.text)
-
-# GET https://core.originality.ai/api/user/apiKeys
-# reponse["api_keys"][0]["api_token"]
-
-# POST https://core.originality.ai/api/user/apiKeys/create
-# empty body
-# reponse["api_key"]["api_token"]
