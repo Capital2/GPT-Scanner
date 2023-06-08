@@ -25,7 +25,6 @@ class OriginalityVerdictData:
     public_link: str # root["public_link"]
     ai_score: float # root["ai"]["score"]["ai"]
     plagiarism_score: str # root["plagiarism"]["total_text_score"]
-    credits_remaining: int # root["credits"]
 
 @dataclass
 class OriginalityAccountData:
@@ -222,10 +221,9 @@ class OriginalityVerdict:
         res = OriginalityVerdictData(
             public_link= jsonresponse["public_link"],
             ai_score= jsonresponse["ai"]["score"]["ai"] if check_ai else -1,
-            plagiarism_score= jsonresponse["plagiarism"]["total_text_score"] if check_plagiarism else -1,
-            credits_remaining= jsonresponse["credits"]
+            plagiarism_score= jsonresponse["plagiarism"]["total_text_score"] if check_plagiarism else -1
         )
-        acc.credit_count = res.credits_remaining
+        account_data.credit_count = jsonresponse["credits"]
         LOG.info(f"api request complete with result {res}")
         return res
 
