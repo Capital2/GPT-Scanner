@@ -160,8 +160,8 @@ class ZeroAccount:
         # login
         client = requests.Session()
         client.headers = client.headers = {
-            'authority': 'https://gptzero.me/',
-            'accept': 'text/event-stream',
+            'authority': 'api.gptzero.me',
+            'accept': '*/*',
             'accept-language': 'en,fr-FR;q=0.9,fr;q=0.8,es-ES;q=0.7,es;q=0.6,en-US;q=0.5,am;q=0.4,de;q=0.3',
             'cache-control': 'no-cache',
             'referer': 'https://gptzero.me/',
@@ -184,14 +184,6 @@ class ZeroAccount:
         r = client.post(LOGIN_URL, json=payload)
         token = r.json()["access_token"]
 
-        client.headers.update({
-            "apikey": token
-        })
-        client.cookies.update({
-            "sb-access-token": token
-        })
-        r = client.get(HISTORY_URL)
-        print(r.json())
         if token:
             ret.authcookie = token
             LOG.info(f"Login successful with account {ret}")
@@ -207,8 +199,8 @@ class ZeroVerdict:
     def get(content : str, account_data: ZeroAccountData):
         client = requests.session()
         client.headers = {
-            'authority': 'https://gptzero.me/',
-            'accept': 'text/event-stream',
+            'authority': 'api.gptzero.me',
+            'accept': '*/*',
             'accept-language': 'en,fr-FR;q=0.9,fr;q=0.8,es-ES;q=0.7,es;q=0.6,en-US;q=0.5,am;q=0.4,de;q=0.3',
             'cache-control': 'no-cache',
             'referer': 'https://gptzero.me/',
@@ -219,13 +211,16 @@ class ZeroVerdict:
             'sec-fetch-mode': 'cors',
             'sec-fetch-site': 'same-origin',
             'user-agent': UserAgent().random,
-            "authorization": f"Bearer {account_data.authcookie}",
-            "apikey": account_data.authcookie
+            "content-type": "application/json"
         }
+        # absolutely necessary
+        client.cookies.update({
+            "accessToken4": account_data.authcookie
+        })
         payload = {
             "document": content
         }
-        r = requests.post(API_ENDPOINT_URL, json=payload)
+        r = client.post(API_ENDPOINT_URL, json=payload)
         jsonresponse = r.json()
         LOG.debug(f"Api response: {jsonresponse}")
         
@@ -234,13 +229,13 @@ class ZeroVerdict:
             completely_generated_prob=jsonresponse["documents"][0]["completely_generated_prob"],
             overall_burstiness=jsonresponse["documents"][0]["overall_burstiness"]
         )
-
+        # r = client.get(HISTORY_URL)
         LOG.info(f"return data generated successfully: {res}")
         return res
 
 
 if __name__ == "__main__":
-    # logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.INFO)
     acc = ZeroAccount.get_from_local()
     if not acc:
         acc = ZeroAccount.create()
