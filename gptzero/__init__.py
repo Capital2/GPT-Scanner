@@ -11,12 +11,14 @@ import fileinput
 import logging
 from retrying import retry
 
-ACCOUNTS_PATH = "zeroaccounts.txt"
+ACCOUNTS_PATH = "data/zeroaccounts.txt"
 LOG = logging.getLogger(__name__)
 SIGNUP_URL = "https://lydqhgdzhvsqlcobdfxi.supabase.co/auth/v1/signup"
 LOGIN_URL = "https://lydqhgdzhvsqlcobdfxi.supabase.co/auth/v1/token?grant_type=password"
 API_ENDPOINT_URL = "https://api.gptzero.me/v2/predict/text"
 GENERIC_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx5ZHFoZ2R6aHZzcWxjb2JkZnhpIiwicm9sZSI6ImFub24iLCJpYXQiOjE2ODA5MTMyNDUsImV4cCI6MTk5NjQ4OTI0NX0.fiun9l_A2j_tHza1j8W_bEAHHj4NzS1PdpL3RX4-eWc"
+HISTORY_URL = "https://api.gptzero.me/v2/user/callHistory"
+
 @dataclass
 class ZeroAccountData:
     email: str
@@ -112,12 +114,14 @@ class ZeroAccount:
         client.headers.update({
             "authorization": f"Bearer {acc.authcookie}"
         })
+        r = client.get(HISTORY_URL)
         # check if we're logged in (make the server reply with our email)
         r = client.get(f"https://lydqhgdzhvsqlcobdfxi.supabase.co/rest/v1/profiles?select=email&email=eq.{acc.email}")
         if not r.json()[0]["email"] == acc.email:
             LOG.error(f"failed to log in with account {acc}")
             return None
             # add handling
+            
         LOG.info(f"account created successfully: {acc}")
 
         if save_account:
@@ -168,7 +172,8 @@ class ZeroAccount:
             'sec-fetch-mode': 'cors',
             'sec-fetch-site': 'same-origin',
             'user-agent': UserAgent().random,
-            "apikey": f"{GENERIC_TOKEN}"
+            "apikey": f"{GENERIC_TOKEN}",
+            "content-type": "application/json"
         }
         payload = {
             "data": {},
@@ -178,6 +183,15 @@ class ZeroAccount:
         }
         r = client.post(LOGIN_URL, json=payload)
         token = r.json()["access_token"]
+
+        client.headers.update({
+            "apikey": token
+        })
+        client.cookies.update({
+            "sb-access-token": token
+        })
+        r = client.get(HISTORY_URL)
+        print(r.json())
         if token:
             ret.authcookie = token
             LOG.info(f"Login successful with account {ret}")
@@ -205,7 +219,8 @@ class ZeroVerdict:
             'sec-fetch-mode': 'cors',
             'sec-fetch-site': 'same-origin',
             'user-agent': UserAgent().random,
-            "authorization": f"Bearer {account_data.authcookie}"
+            "authorization": f"Bearer {account_data.authcookie}",
+            "apikey": account_data.authcookie
         }
         payload = {
             "document": content
@@ -225,7 +240,7 @@ class ZeroVerdict:
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
+    # logging.basicConfig(level=logging.DEBUG)
     acc = ZeroAccount.get_from_local()
     if not acc:
         acc = ZeroAccount.create()

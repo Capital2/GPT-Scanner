@@ -17,7 +17,7 @@ EMAIL_VERIF_URL = "https://core.originality.ai/api/user/email/verify"
 USER_REGISTER_URL = "https://core.originality.ai/api/user/register"
 CREATE_APIKEY_URL = "https://core.originality.ai/api/user/apiKeys/create"
 API_BASE_URL = "https://api.originality.ai/api/v1/scan"
-ACCOUNTS_PATH = "accounts.txt"
+ACCOUNTS_PATH = "data/accounts.txt"
 LOG = logging.getLogger(__name__)
 
 @dataclass

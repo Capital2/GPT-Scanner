@@ -1,2 +1,3 @@
 .venv/*
 data/*accounts.txt
+*/__pycache__/
