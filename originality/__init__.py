@@ -21,7 +21,7 @@ ACCOUNTS_PATH = "accounts.txt"
 LOG = logging.getLogger(__name__)
 
 @dataclass
-class OriginalityAiVerdict:
+class OriginalityVerdictData:
     public_link: str # root["public_link"]
     ai_score: float # root["ai"]["score"]["ai"]
     plagiarism_score: str # root["plagiarism"]["total_text_score"]
@@ -108,7 +108,7 @@ class OriginalityAccount:
         if r :
             acc.access_token = r.json()["auth_data"]["access_token"]
         else:
-            LOG.error(f"FATAL: could not register with {acc} \nretrying ...")
+            LOG.error(f"FATAL: could not register with {acc} with error text {r.text}\nretrying ...")
             raise RequestException(f"problem with registring HTTP: {r.status_code} check logs for more info")
         # verify email
         while True:
@@ -188,13 +188,13 @@ class OriginalityAccount:
         return None
 
 
-class Verdict:
+class OriginalityVerdict:
     @staticmethod
     def get(
         content:str,
         account_data: OriginalityAccountData,
         check_plagiarism = True,
-        check_ai = True) -> OriginalityAiVerdict :
+        check_ai = True) -> OriginalityVerdictData :
 
         if not (check_plagiarism or check_ai):
             LOG.warning("check_plagiarism and check_ai cannot be both set to false, setting check_ai to True")
@@ -220,7 +220,7 @@ class Verdict:
             raise RequestException(f"{API_BASE_URL + endpoint} returned with error code: {r.status_code}")
         jsonresponse = r.json()
         LOG.debug(f"Api response: {jsonresponse}")
-        res = OriginalityAiVerdict(
+        res = OriginalityVerdictData(
             public_link= jsonresponse["public_link"],
             ai_score= jsonresponse["ai"]["score"]["ai"] if check_ai else -1,
             plagiarism_score= jsonresponse["plagiarism"]["total_text_score"] if check_plagiarism else -1,
@@ -240,4 +240,4 @@ if __name__ == "__main__":
     if not acc:
         acc = OriginalityAccount.create()
     
-    verdict = Verdict.get(content, acc)
+    verdict = OriginalityVerdict.get(content, acc)
