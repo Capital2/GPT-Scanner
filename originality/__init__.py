@@ -162,7 +162,6 @@ class OriginalityAccount:
     @staticmethod
     def get_from_local(min_credits = 50) -> OriginalityAccountData | None:
 
-
         with open(ACCOUNTS_PATH, 'r') as f:
             line = f.readline()
             while line:

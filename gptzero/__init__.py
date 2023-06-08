@@ -14,6 +14,7 @@ from retrying import retry
 ACCOUNTS_PATH = "zeroaccounts.txt"
 LOG = logging.getLogger(__name__)
 SIGNUP_URL = "https://lydqhgdzhvsqlcobdfxi.supabase.co/auth/v1/signup"
+LOGIN_URL = "https://lydqhgdzhvsqlcobdfxi.supabase.co/auth/v1/token?grant_type=password"
 API_ENDPOINT_URL = "https://api.gptzero.me/v2/predict/text"
 GENERIC_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx5ZHFoZ2R6aHZzcWxjb2JkZnhpIiwicm9sZSI6ImFub24iLCJpYXQiOjE2ODA5MTMyNDUsImV4cCI6MTk5NjQ4OTI0NX0.fiun9l_A2j_tHza1j8W_bEAHHj4NzS1PdpL3RX4-eWc"
 @dataclass
@@ -117,17 +118,74 @@ class ZeroAccount:
             LOG.error(f"failed to log in with account {acc}")
             return None
             # add handling
-        
+        LOG.info(f"account created successfully: {acc}")
+
         if save_account:
             LOG.debug(f"saving account")
             with open(ACCOUNTS_PATH, 'a') as f:
                 line = f'{acc.email}::{acc.password}\n'
                 f.write(line)
                 LOG.debug(f"written line {line} in {ACCOUNTS_PATH}")
-        
-        LOG.info(f"account created successfully: {acc}")
+                LOG.info(f"account saved in {ACCOUNTS_PATH}")
         return acc
+    
+    @staticmethod
+    def get_from_local() -> ZeroAccountData | None:
 
+        with open(ACCOUNTS_PATH, 'r') as f:
+            line = f.readline()
+            ret = None
+            while line:
+                linetab = line.rstrip().split('::')
+
+                if len(linetab) != 2 :
+                    LOG.warning(f"{line} in {ACCOUNTS_PATH} has too many or too few fields: expected 2 found {len(linetab)}")
+                    continue
+
+                ret = ZeroAccountData(
+                    email=linetab[0],
+                    password=linetab[1]
+                )
+                LOG.debug(f"loaded {ret}")
+                break
+            line = f.readline()
+        if not ret:
+            LOG.info(f"no saved account found")
+            return None
+
+        # login
+        client = requests.Session()
+        client.headers = client.headers = {
+            'authority': 'https://gptzero.me/',
+            'accept': 'text/event-stream',
+            'accept-language': 'en,fr-FR;q=0.9,fr;q=0.8,es-ES;q=0.7,es;q=0.6,en-US;q=0.5,am;q=0.4,de;q=0.3',
+            'cache-control': 'no-cache',
+            'referer': 'https://gptzero.me/',
+            'sec-ch-ua': '"Not_A Brand";v="99", "Google Chrome";v="109", "Chromium";v="109"',
+            'sec-ch-ua-mobile': '?0',
+            'sec-ch-ua-platform': '"Windows"',
+            'sec-fetch-dest': 'empty',
+            'sec-fetch-mode': 'cors',
+            'sec-fetch-site': 'same-origin',
+            'user-agent': UserAgent().random,
+            "apikey": f"{GENERIC_TOKEN}"
+        }
+        payload = {
+            "data": {},
+            "email": ret.email,
+            "gotrue_meta_security": {},
+            "password": ret.password
+        }
+        r = client.post(LOGIN_URL, json=payload)
+        token = r.json()["access_token"]
+        if token:
+            ret.authcookie = token
+            LOG.info(f"Login successful with account {ret}")
+            LOG.debug(f"cookie returned:\n{token} ")
+            return ret
+        
+        LOG.error(f"No access token in response:\n{r.json()}")
+        return None
 
 class ZeroVerdict:
 
@@ -166,9 +224,11 @@ class ZeroVerdict:
         return res
 
 
-
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-    acc = ZeroAccount.create()
+    acc = ZeroAccount.get_from_local()
+    if not acc:
+        acc = ZeroAccount.create()
+    
     content = "The first person to use the concept of a singularity in the technological context was the 20th-century Hungarian-American mathematician John von Neumann.Stanislaw Ulam reports in 1958 an earlier discussion with von Neumann centered on the accelerating progress of technology and changes in the mode of human life, which gives the appearance of approaching some essential singularity in the history of the race beyond which human affairs, as we know them, could not continue Subsequent authors have echoed this viewpoint.The concept and the term singularity were popularized by Vernor Vinge first in 1983 in an article that claimed that once humans create intelligences greater than their own, there will be a technological and social transition similar in some sense to the knotted space-time at the center of a black hole and later in his 1993 essay The Coming Technological Singularity, in which he wrote that it would signal the end of the human era, as the new superintelligence would continue to upgrade itself and would advance technologically at an incomprehensible rate. He wrote that he would be surprised if it occurred before 2005 or after 2030. Another significant contributor to wider circulation of the notion was Ray Kurzweil's 2005 book The Singularity Is Near, predicting singularity by 2045."
     res = ZeroVerdict.get(content, acc)
