@@ -1,4 +1,4 @@
 .venv/*
 data/*accounts.txt
 */__pycache__/
-.vscode/
+.vscode/*

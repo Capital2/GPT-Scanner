@@ -10,6 +10,8 @@ import secrets, string
 import fileinput
 import logging
 from retrying import retry
+import os, sys
+sys.path.append(os.path.join(os.path.dirname(__file__), os.path.pardir))
 
 ACCOUNTS_PATH = "data/zeroaccounts.txt"
 LOG = logging.getLogger(__name__)

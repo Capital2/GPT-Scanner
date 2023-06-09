@@ -10,6 +10,8 @@ import secrets, string
 import fileinput
 import logging
 from retrying import retry
+import os, sys
+sys.path.append(os.path.join(os.path.dirname(__file__), os.path.pardir))
 # 1 credit for 50 words for the 2 apis combined (plagiarism and ai detection)
 # 2500 words softlock for each email verified account
 
@@ -173,7 +175,7 @@ class OriginalityAccount:
                 if int(linetab[0]) >= min_credits :
                     ret = OriginalityAccountData(
                         name="",
-                        _credit_count=linetab[0],
+                        _credit_count=int(linetab[0]),
                         active_apikey=linetab[1],
                         email=linetab[2],
                         password=linetab[3],
@@ -200,9 +202,9 @@ class OriginalityVerdict:
         if (check_plagiarism and check_ai):
             endpoint = "/ai-plag"
         elif (check_plagiarism):
-            endpoint = "plag"
+            endpoint = "/plag"
         else:
-            endpoint = "ai"
+            endpoint = "/ai"
         
         payload = {
             "content": content
@@ -217,6 +219,7 @@ class OriginalityVerdict:
             LOG.error(f"POST {API_BASE_URL + endpoint} returned {r.text}")
             raise RequestException(f"{API_BASE_URL + endpoint} returned with error code: {r.status_code}")
         jsonresponse = r.json()
+        print(r.status_code)
         LOG.debug(f"Api response: {jsonresponse}")
         res = OriginalityVerdictData(
             public_link= jsonresponse["public_link"],
