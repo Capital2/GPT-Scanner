@@ -1,6 +1,7 @@
 import unittest
 from unittest import mock
 from originality import *
+import requests
 ACCOUNTS_PATH_TEST = "tests/testdata/accounts.txt"
 
 def mocked_requests_get(*args, **kwargs):
@@ -16,6 +17,7 @@ def mocked_requests_get(*args, **kwargs):
         return MockResponse({"key1": "value1"}, 200)
     elif args[0] == 'http://someotherurl.com/anothertest.json':
         return MockResponse({"key2": "value2"}, 200)
+    return MockResponse(None, 403)
 
 def mocked_requests_post(*args, **kwargs):
     
@@ -85,8 +87,11 @@ class OriginalityTest(unittest.TestCase):
         self.assertFalse(OriginalityAccount.get_from_local(21))
         self.assertEqual(OriginalityAccount.get_from_local(20), acc)
 
-    def test_accounts_create(self):
-        # TODO mock requests.Session
+    @mock.patch('originality.requests.Session.post', side_effect=mocked_requests_post)
+    def test_accounts_create_registration(self, mock_post):
+        # OriginalityAccount.create()
+        # self.assertIn(mock.call(USER_REGISTER_URL), mock_post.call_args_list)
+        # TODO can't test create for now, mail.register() uses requests also
         pass
 
 if __name__ == '__main__':
