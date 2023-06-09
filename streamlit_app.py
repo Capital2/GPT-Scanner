@@ -40,15 +40,15 @@ st.set_page_config(
     initial_sidebar_state="expanded",
     layout="wide",
     page_icon="🔍",
-    # menu_items={
-    #     'Get Help': '',
-    #     'Report a bug': "",
-    #     'About': "",
-    # },
+    menu_items={
+        'Get Help': 'https://github.com/Capital2/GPT-Scanner/blob/master/README.md',
+        'Report a bug': "https://github.com/Capital2/GPT-Scanner/issues",
+        'About': "https://github.com/Capital2/GPT-Scanner",
+    },
 )
 st.header('GPT Scanner')
 
-question_text_area = st.text_area('Paste content to scan :')
+question_text_area = st.text_area('Paste content to scan (minimum 100 words):')
 
 if st.button('🔍 Scan'):
 
