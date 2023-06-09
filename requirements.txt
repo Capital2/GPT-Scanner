@@ -8,10 +8,12 @@ idna==3.4
 pymailtm==1.1.1
 pyparsing==3.0.9
 pyperclip==1.8.2
-random-username==1.0.2
 requests==2.31.0
 requests-toolbelt==1.0.0
 six==1.16.0
 urllib3==2.0.2
 webencodings==0.5.1
-mailgw_temporary_email
+streamlit
+MailGw-Temporary-Email
+Faker
+retrying
