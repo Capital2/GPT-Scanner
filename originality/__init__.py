@@ -10,6 +10,7 @@ import secrets, string
 import fileinput
 import logging
 from retrying import retry
+import os
 # 1 credit for 50 words for the 2 apis combined (plagiarism and ai detection)
 # 2500 words softlock for each email verified account
 
@@ -140,7 +141,7 @@ class OriginalityAccount:
         acc.active_apikey = OriginalityAccount.__create_api_key(client, acc.access_token)
         if save_account:
             LOG.debug(f"saving account")
-            with open(ACCOUNTS_PATH, 'a') as f:
+            with open(ACCOUNTS_PATH, 'a+') as f:
                 line = f'{acc.credit_count}::{acc.active_apikey}::{acc.email}::{acc.password}\n'
                 f.write(line)
                 LOG.debug(f"written line {line} in {ACCOUNTS_PATH}")
@@ -160,7 +161,8 @@ class OriginalityAccount:
     
     @staticmethod
     def get_from_local(min_credits = 50) -> OriginalityAccountData | None:
-
+        if not os.path.exists(ACCOUNTS_PATH):
+            return None
         with open(ACCOUNTS_PATH, 'r') as f:
             line = f.readline()
             while line:

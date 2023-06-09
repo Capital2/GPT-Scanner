@@ -10,6 +10,7 @@ import secrets, string
 import fileinput
 import logging
 from retrying import retry
+import os
 
 ACCOUNTS_PATH = "data/zeroaccounts.txt"
 LOG = logging.getLogger(__name__)
@@ -126,7 +127,7 @@ class ZeroAccount:
 
         if save_account:
             LOG.debug(f"saving account")
-            with open(ACCOUNTS_PATH, 'a') as f:
+            with open(ACCOUNTS_PATH, 'a+') as f:
                 line = f'{acc.email}::{acc.password}\n'
                 f.write(line)
                 LOG.debug(f"written line {line} in {ACCOUNTS_PATH}")
@@ -135,7 +136,8 @@ class ZeroAccount:
     
     @staticmethod
     def get_from_local() -> ZeroAccountData | None:
-
+        if not os.path.exists(ACCOUNTS_PATH):
+            return None
         with open(ACCOUNTS_PATH, 'r') as f:
             line = f.readline()
             ret = None

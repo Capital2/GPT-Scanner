@@ -51,9 +51,9 @@ APIs such as [GPTZero](https://gptzero.me/) and [Originality.ai](https://app.ori
 ### Note:
 This repository is not associated with or endorsed by providers of the APIs contained in this GitHub repository. This project is intended for educational purposes only.
 
-### Built With
+### Dependencies
 
-* ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
+* ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)  version 3.10
 
 
 <!-- GETTING STARTED -->
@@ -66,10 +66,12 @@ This repository is not associated with or endorsed by providers of the APIs cont
 2. Make venv and install dependencies
    ```sh
    cd GPT-Scanner/
-   python3 -m venv venv
+   mkdir data/ # used to store accounts
+   python3 -m venv .venv
+   source .venv/bin/activate
    pip install -r requirements.txt
    ```
-3. Run Streamlit
+3. Run
    ```sh
    streamlit run streamlit_app.py
    ```
