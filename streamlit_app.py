@@ -36,7 +36,7 @@ def get_originality_scan(content: str):
     
 # Set page configuration and add header
 st.set_page_config(
-    page_title="GPT Zero scan",
+    page_title="GPT Scanner",
     initial_sidebar_state="expanded",
     layout="wide",
     page_icon="🔍",
@@ -46,15 +46,12 @@ st.set_page_config(
     #     'About': "",
     # },
 )
-st.header('GPT Zero scan')
+st.header('GPT Scanner')
 
-# Add text area for user input and button to get answer
 question_text_area = st.text_area('Paste content to scan :')
 
 if st.button('🔍 Scan'):
-    
-    # escaped = answer.encode('utf-8').decode('unicode-escape')
-    # Display answer
+
     with st.container():
         left, right = st.columns(2)
         with left:
@@ -68,7 +65,6 @@ if st.button('🔍 Scan'):
             overdict = get_originality_scan(question_text_area)
             st.table(asdict(overdict))
 
-# Hide Streamlit footer
 hide_streamlit_style = """
             <style>
             footer {visibility: hidden;}
