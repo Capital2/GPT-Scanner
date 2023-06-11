@@ -48,6 +48,7 @@
 ## About The Project
 
 APIs such as [GPTZero](https://gptzero.me/) and [Originality.ai](https://app.originality.ai/) are open for you to try them out.
+![](screenshots/screenshot1.png)
 ### Note:
 This repository is not associated with or endorsed by providers of the APIs contained in this GitHub repository. This project is intended for educational purposes only.
 
