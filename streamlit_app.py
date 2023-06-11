@@ -7,6 +7,7 @@ from gptzero import ZeroAccount, ZeroVerdict, ZeroVerdictData
 from originality import OriginalityAccount, OriginalityVerdict
 import logging
 from dataclasses import asdict
+import pandas as pd
 
 logging.basicConfig(level=logging.INFO)
 
@@ -57,13 +58,23 @@ if st.button('🔍 Scan'):
         with left:
             zverdict = get_zero_scan(question_text_area)
             st.header("GPTZero")
-            st.table(asdict(zverdict))
-            st.caption(f"the burstiness is a measurement of the variation of the randomness of the text")
+            st.markdown(f"""
+            |Metric|Value|
+            |:--|--:|
+            Average generated probability | {zverdict.average_generated_prob}
+            Completely generated probablity | {zverdict.completely_generated_prob}
+            Overall burstiness* | {zverdict.overall_burstiness}""")
+            st.caption(f"*: burstiness is a measurement of the variation of the randomness of the text")
             st.caption("burstiness over 90 is often regarded as human")
         with right:
             st.header("Originality.ai")
             overdict = get_originality_scan(question_text_area)
-            st.table(asdict(overdict))
+            st.markdown(f"""
+            |Metric|Value|
+            |:--|------:|
+            AI score | {overdict.ai_score}
+            Plagiarism score | {overdict.plagiarism_score}
+            Public link | [Originality.ai site]({overdict.public_link})""")
 
 hide_streamlit_style = """
             <style>
