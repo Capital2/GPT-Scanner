@@ -218,7 +218,7 @@ class OriginalityVerdict:
 
         if not r:
             LOG.error(f"POST {API_BASE_URL + endpoint} returned {r.text}")
-            raise RequestException(f"{API_BASE_URL + endpoint} returned with error code: {r.status_code}")
+            raise RequestException(f"error: {r.json()['error']}")
         jsonresponse = r.json()
         print(r.status_code)
         LOG.debug(f"Api response: {jsonresponse}")
