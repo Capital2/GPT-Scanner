@@ -17,8 +17,11 @@ sys.path.append(os.path.join(os.path.dirname(__file__), os.path.pardir))
 
 EMAIL_VERIF_URL = "https://core.originality.ai/api/user/email/verify"
 USER_REGISTER_URL = "https://core.originality.ai/api/user/register"
+USER_ACCOUNT_INFO = "https://core.originality.ai/api/user/account"
+USER_LOGIN_URL = "https://core.originality.ai/api/user/login"
 CREATE_APIKEY_URL = "https://core.originality.ai/api/user/apiKeys/create"
 API_BASE_URL = "https://api.originality.ai/api/v1/scan"
+FREE_API_URL = "https://core.originality.ai/api/user/content-scans"
 ACCOUNTS_PATH = "data/accounts.txt"
 LOG = logging.getLogger(__name__)
 
@@ -161,6 +164,43 @@ class OriginalityAccount:
         return r.json()["api_key"]["api_token"]
     
     @staticmethod
+    def _login(account_data: OriginalityAccountData) -> OriginalityAccountData | None:
+        if account_data.access_token:
+            return account_data
+        
+        client = requests.session()
+        client.headers = {
+            'authority': 'core.originality.ai',
+            'accept': 'application/json, text/plain, */*',
+            'accept-language': 'en,fr-FR;q=0.9,fr;q=0.8,es-ES;q=0.7,es;q=0.6,en-US;q=0.5,am;q=0.4,de;q=0.3',
+            'cache-control': 'no-cache',
+            'referer': 'https://app.originality.ai/',
+            'sec-ch-ua': '"Not_A Brand";v="99", "Google Chrome";v="109", "Chromium";v="109"',
+            'sec-ch-ua-mobile': '?0',
+            'sec-ch-ua-platform': '"Windows"',
+            'sec-fetch-dest': 'empty',
+            'sec-fetch-mode': 'cors',
+            'sec-fetch-site': 'same-origin',
+            'user-agent': UserAgent().random,
+        }
+
+        payload = {
+            "email":account_data.email,
+            "password":account_data.password,
+            "captcha": "null"
+        }
+
+        r = client.post(url=USER_LOGIN_URL, json=payload)
+        if r :
+            account_data.access_token = r.json()["auth_data"]["access_token"]
+            LOG.info("Login successful.")
+        else:
+            LOG.error(f"FATAL: could not login with {account_data} with error text {r.text}")
+        
+        return account_data
+
+
+    @staticmethod
     def get_from_local(min_credits = 50) -> OriginalityAccountData | None:
         if not os.path.exists(ACCOUNTS_PATH):
             return None
@@ -220,7 +260,6 @@ class OriginalityVerdict:
             LOG.error(f"POST {API_BASE_URL + endpoint} returned {r.text}")
             raise RequestException(f"error: {r.json()['error']}")
         jsonresponse = r.json()
-        print(r.status_code)
         LOG.debug(f"Api response: {jsonresponse}")
         res = OriginalityVerdictData(
             public_link= jsonresponse["public_link"],
@@ -231,14 +270,80 @@ class OriginalityVerdict:
         LOG.info(f"api request complete with result {res}")
         return res
 
+    @staticmethod
+    def free_get(content:str,
+        account_data: OriginalityAccountData,
+        check_plagiarism = True,
+        check_ai = True) -> str :
+
+        if not account_data.access_token:
+            account_data = OriginalityAccount._login(account_data)
+
+        payload = {
+            "originalContent": content,
+            "scanType": 0,
+            "aiModelVersion": 1,
+            "creditCost": 3,
+            "sentences": [
+                "un",
+                "dos",
+                "tres",
+                "quatro"
+            ]
+        }
+        headers = {
+            "Authorization": f"Bearer {account_data.access_token}",
+
+            'authority': 'core.originality.ai',
+            'accept': 'application/json, text/plain, */*',
+            'accept-language': 'en,fr-FR;q=0.9,fr;q=0.8,es-ES;q=0.7,es;q=0.6,en-US;q=0.5,am;q=0.4,de;q=0.3',
+            'cache-control': 'no-cache',
+            'referer': 'https://app.originality.ai/',
+            'sec-ch-ua': '"Not_A Brand";v="99", "Google Chrome";v="109", "Chromium";v="109"',
+            'sec-ch-ua-mobile': '?0',
+            'sec-ch-ua-platform': '"Windows"',
+            'sec-fetch-dest': 'empty',
+            'sec-fetch-mode': 'cors',
+            'sec-fetch-site': 'same-origin',
+            'user-agent': UserAgent().random,
+        }
+
+        r = requests.post(FREE_API_URL, headers=headers, json=payload)
+        if not r:
+            LOG.error(f"POST {FREE_API_URL} returned {r.text}")
+            raise RequestException(f"error: {r.json()['error']}")
+        jsonresponse = r.json()
+
+        LOG.debug(f"Api response: {jsonresponse}")
+        res = OriginalityVerdictData(
+            public_link= f"https://app.originality.ai/content-scan/{jsonresponse['scanID']}",
+            ai_score= jsonresponse["ai_detection"]["fake"] if check_ai else -1,
+            plagiarism_score= jsonresponse["plagiarism_score"] if check_plagiarism else -1
+        )
+        LOG.info(f"api request complete with result {res}")
+
+        account_data.credit_count = requests.get(USER_ACCOUNT_INFO, headers=headers).json()["credits"]["current_credits"]
+        LOG.info(f"credits remaining: {account_data.credit_count}")
+        return res
+
+
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
-    content = "The first person to use the concept of a singularity in the technological context was the 20th-century Hungarian-American mathematician John von Neumann.Stanislaw Ulam reports in 1958 an earlier discussion with von Neumann centered on the accelerating progress of technology and changes in the mode of human life, which gives the appearance of approaching some essential singularity in the history of the race beyond which human affairs, as we know them, could not continue Subsequent authors have echoed this viewpoint.The concept and the term singularity were popularized by Vernor Vinge first in 1983 in an article that claimed that once humans create intelligences greater than their own, there will be a technological and social transition similar in some sense to the knotted space-time at the center of a black hole and later in his 1993 essay The Coming Technological Singularity, in which he wrote that it would signal the end of the human era, as the new superintelligence would continue to upgrade itself and would advance technologically at an incomprehensible rate. He wrote that he would be surprised if it occurred before 2005 or after 2030. Another significant contributor to wider circulation of the notion was Ray Kurzweil's 2005 book The Singularity Is Near, predicting singularity by 2045."
+    # TODO: divide to sentences, so the plagiarism works
+    logging.basicConfig(level=logging.DEBUG)
+    content="""
+Any identifier of the form __spam (at least two leading underscores, at most one trailing underscore) is textually replaced with _classname__spam, where classname is the current class name with leading underscore(s) stripped. This mangling is done without regard to the syntactic position of the identifier, so it can be used to define class-private instance and class variables, methods, variables stored in globals, and even variables stored in instances. private to this class on instances of other classes.
+
+And a warning from the same page:
+
+Name mangling is intended to give classes an easy way to define “private” instance variables and methods, without having to worry about instance variables defined by derived classes, or mucking with instance variables by code outside the class. Note that the mangling rules are designed mostly to avoid accidents; it still is possible for a determined soul to access or modify a variable that is considered private.
+
+"""
     estimated_credits = -(sum(1 for c in content if c in ' \t\n') // -50) # estimated if ai+plagiat (also the negatives make a ciel)
 
     acc = OriginalityAccount.get_from_local(estimated_credits)
     if not acc:
         acc = OriginalityAccount.create()
     
-    verdict = OriginalityVerdict.get(content, acc)
+    verdict = OriginalityVerdict.free_get(content, acc)
+

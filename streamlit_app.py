@@ -27,7 +27,7 @@ def get_originality_scan(content: str):
     if not account and estimated_credits_cost < 50:
         account = ZeroAccount.create()
 
-    res = OriginalityVerdict.get(content, account, )
+    res = OriginalityVerdict.free_get(content, account, )
     return res
 
 def display_word_count(text):
@@ -66,8 +66,7 @@ if st.button('🔍 Scan'):
                 Average generated probability | {zverdict.average_generated_prob}
                 Completely generated probablity | {zverdict.completely_generated_prob}
                 Overall burstiness* | {zverdict.overall_burstiness}""")
-                st.caption(f"*: burstiness is a measurement of the variation of the randomness of the text")
-                st.caption("burstiness over 90 is often regarded as human")
+                st.caption(f"*: burstiness is a measurement of the variation of the randomness of the text (burstiness over 90 is often regarded as human)")
             except Exception as e:
                 st.write(f"GPTzero error: {e}")
         with right:
