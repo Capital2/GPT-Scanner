@@ -105,10 +105,6 @@ Distributed under the GNU/GPLv3 Licence. See `LICENSE` for more information.
 * [AWesome Badges](https://github.com/Ileriayo/markdown-badges)
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-## Update
-Originality api's access is now through a subscription, that breaks the code as it relies on it;
-Problem is fixable, I will implement changes as soon as I get some free time.
-
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
 [contributors-shield]: https://img.shields.io/github/contributors/Capital2/GPT-Scanner.svg?style=for-the-badge
