@@ -5,6 +5,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), os.path.pardir))
 import streamlit as st
 from gptzero import ZeroAccount, ZeroVerdict, ZeroVerdictData
 from originality import OriginalityAccount, OriginalityVerdict
+from zeroGPT import zeroGPTVerdict
 import logging
 from dataclasses import asdict
 import pandas as pd
@@ -55,7 +56,7 @@ if question_text_area:
 if st.button('🔍 Scan'):
 
     with st.container():
-        left, right = st.columns(2)
+        left, middle, right = st.columns(3)
         with left:
             try :
                 zverdict = get_zero_scan(question_text_area)
@@ -69,6 +70,16 @@ if st.button('🔍 Scan'):
                 st.caption(f"*: burstiness is a measurement of the variation of the randomness of the text (burstiness over 90 is often regarded as human)")
             except Exception as e:
                 st.write(f"GPTzero error: {e}")
+        with middle:
+            st.header("ZeroGPT")
+            verdict = zeroGPTVerdict(question_text_area)
+            st.markdown(f"""
+            |Metric|Value|
+            |:--|--:|
+            Average generated probability | {verdict["ai_percentage"]}
+            suspected_generated_text |{verdict["suspected_text"]} 
+            additional feedback |{verdict["additional_feedback"]}
+            """)
         with right:
 
             st.header("Originality.ai")
