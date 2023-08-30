@@ -11,6 +11,8 @@ import fileinput
 import logging
 from retrying import retry
 import os, sys
+from .sentence_split import split_into_sentences
+
 sys.path.append(os.path.join(os.path.dirname(__file__), os.path.pardir))
 # 1 credit for 50 words for the 2 apis combined (plagiarism and ai detection)
 # 2500 words softlock for each email verified account
@@ -193,7 +195,7 @@ class OriginalityAccount:
         r = client.post(url=USER_LOGIN_URL, json=payload)
         if r :
             account_data.access_token = r.json()["auth_data"]["access_token"]
-            LOG.info("Login successful.")
+            LOG.info(f"Login successful with account {account_data}")
         else:
             LOG.error(f"FATAL: could not login with {account_data} with error text {r.text}")
         
@@ -279,17 +281,15 @@ class OriginalityVerdict:
         if not account_data.access_token:
             account_data = OriginalityAccount._login(account_data)
 
+        # the plagiarism detector needs a sentences breackdown to operate
+        # the current split_into_sentences function is anglophone
         payload = {
             "originalContent": content,
             "scanType": 0,
             "aiModelVersion": 1,
             "creditCost": 3,
-            "sentences": [
-                "un",
-                "dos",
-                "tres",
-                "quatro"
-            ]
+            "sentences": split_into_sentences(content)
+            
         }
         headers = {
             "Authorization": f"Bearer {account_data.access_token}",
@@ -330,7 +330,7 @@ class OriginalityVerdict:
 
 if __name__ == "__main__":
     # TODO: divide to sentences, so the plagiarism works
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.INFO)
     content="""
 Any identifier of the form __spam (at least two leading underscores, at most one trailing underscore) is textually replaced with _classname__spam, where classname is the current class name with leading underscore(s) stripped. This mangling is done without regard to the syntactic position of the identifier, so it can be used to define class-private instance and class variables, methods, variables stored in globals, and even variables stored in instances. private to this class on instances of other classes.
 
@@ -346,4 +346,5 @@ Name mangling is intended to give classes an easy way to define “private” in
         acc = OriginalityAccount.create()
     
     verdict = OriginalityVerdict.free_get(content, acc)
+    print(verdict)
 
