@@ -1,4 +1,8 @@
 import requests
+import logging
+
+LOG = logging.getLogger(__name__)
+
 def zeroGPTVerdict(text:str)->dict:
     """
     this function return ``dict`` that contains:
@@ -25,10 +29,12 @@ def zeroGPTVerdict(text:str)->dict:
     response = requests.post(url,  headers=headers,json=data)
     
     response =  response.json()
+    LOG.debug(f"post to {url} returned with {response}")
 
     result = {
         "ai_percentage":response["data"]["fakePercentage"],
         "suspected_text":response["data"]["h"],
         "additional_feedback":response["data"]["additional_feedback"]
         }
+    LOG.info(f"returning: {result}")
     return result
