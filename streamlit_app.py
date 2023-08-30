@@ -71,15 +71,22 @@ if st.button('🔍 Scan'):
             except Exception as e:
                 st.write(f"GPTzero error: {e}")
         with middle:
+            c1, c2 = st.columns(2)
             st.header("ZeroGPT")
             verdict = zeroGPTVerdict(question_text_area)
-            st.markdown(f"""
-            |Metric|Value|
-            |:--|--:|
-            Average generated probability | {verdict["ai_percentage"]}
-            suspected_generated_text |{verdict["suspected_text"]} 
-            additional feedback |{verdict["additional_feedback"]}
-            """)
+            
+            with st.container():
+                    st.write("Average generated probability:")
+                    st.write(verdict["ai_percentage"])
+                    
+            with st.container():
+                st.write("Suspected Generated Text:")
+                st.write(verdict["suspected_text"])
+                
+            with st.container():
+                st.write("Additional Feedback:")
+                st.write(verdict["additional_feedback"])
+
         with right:
 
             st.header("Originality.ai")
