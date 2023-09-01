@@ -167,7 +167,7 @@ class OriginalityAccount:
     
     @staticmethod
     def _login(account_data: OriginalityAccountData) -> OriginalityAccountData | None:
-        if account_data.access_token:
+        if hasattr(account_data, 'access_token') and account_data.access_token:
             return account_data
         
         client = requests.session()
