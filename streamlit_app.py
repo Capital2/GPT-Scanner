@@ -9,6 +9,7 @@ from zeroGPT import zeroGPTVerdict
 import logging
 from dataclasses import asdict
 import pandas as pd
+from paraphraser import paraphrase
 
 logging.basicConfig(level=logging.INFO)
 
@@ -48,55 +49,68 @@ st.set_page_config(
 )
 st.header('GPT Scanner')
 
-question_text_area = st.text_area('Paste content to scan (minimum 100 words):')
+with st.container():
+    right, left = st.columns(2)
+    with right:
+        question_text_area = st.text_area('Paste content to scan (minimum 100 words):',height=200)
+    with left:
+        paraphrase_text_area = st.empty()
+        paraphrase_text_area.text_area("paraphrased text from paraphraser.io",height=200)
+    
 if question_text_area:
     count = sum(1 for c in question_text_area if c in ' \t\n') + 1
     st.write(f"word count: {count}")
 
+
+if st.button('✍🏻 Paraphrase'):
+   with left:
+        paraphrase_text_area.empty()
+    #paraphrase_text_area.text_area("paraphrased text from paraphraser.io",height=200,value=paraphrase(question_text_area,"fr"))
+        st.markdown(paraphrase(question_text_area,"fr"),unsafe_allow_html=True)
 if st.button('🔍 Scan'):
 
-    with st.container():
-        left, middle, right = st.columns(3)
-        with left:
-            try :
-                zverdict = get_zero_scan(question_text_area)
-                st.header("GPTZero")
-                st.markdown(f"""
-                |Metric|Value|
-                |:--|--:|
-                Average generated probability | {zverdict.average_generated_prob}
-                Completely generated probablity | {zverdict.completely_generated_prob}
-                Overall burstiness* | {zverdict.overall_burstiness}""")
-                st.caption(f"*: burstiness is a measurement of the variation of the randomness of the text (burstiness over 90 is often regarded as human)")
-            except Exception as e:
-                st.write(f"GPTzero error: {e}")
-        with middle:
-            c1, c2 = st.columns(2)
-            st.header("ZeroGPT")
-            verdict = zeroGPTVerdict(question_text_area)
-            
-            with st.container():
-                    st.write("Average generated probability:")
-                    st.write(verdict["ai_percentage"])
-                    
-            with st.container():
-                st.write("Suspected Generated Text:")
-                st.write(verdict["suspected_text"])
+        with st.container():
+            left, middle, right = st.columns(3)
+            with left:
+                try :
+                    zverdict = get_zero_scan(question_text_area)
+                    st.header("GPTZero")
+                    st.markdown(f"""
+                    |Metric|Value|
+                    |:--|--:|
+                    Average generated probability | {zverdict.average_generated_prob}
+                    Completely generated probablity | {zverdict.completely_generated_prob}
+                    Overall burstiness* | {zverdict.overall_burstiness}""")
+                    st.caption(f"*: burstiness is a measurement of the variation of the randomness of the text (burstiness over 90 is often regarded as human)")
+                except Exception as e:
+                    st.write(f"GPTzero error: {e}")
+            with middle:
+                c1, c2 = st.columns(2)
+                st.header("ZeroGPT")
+                verdict = zeroGPTVerdict(question_text_area)
                 
-            with st.container():
-                st.write("Additional Feedback:")
-                st.write(verdict["additional_feedback"])
+                with st.container():
+                        st.write("Average generated probability:")
+                        st.write(verdict["ai_percentage"])
+                        
+                with st.container():
+                    st.write("Suspected Generated Text:")
+                    st.write(verdict["suspected_text"])
+                    
+                with st.container():
+                    st.write("Additional Feedback:")
+                    st.write(verdict["additional_feedback"])
 
-        with right:
-
-            st.header("Originality.ai")
-            overdict = get_originality_scan(question_text_area)
-            st.markdown(f"""
-            |Metric|Value|
-            |:--|------:|
-            AI score | {overdict.ai_score}
-            Plagiarism score | {overdict.plagiarism_score}
-            Public link | [Originality.ai site]({overdict.public_link})""")
+            with right:
+                st.header("Originality.ai")
+                st.write("originality Ai is under maintance")
+                # overdict = get_originality_scan(question_text_area)
+                # st.markdown(f"""
+                # |Metric|Value|
+                # |:--|------:|
+                # AI score | {overdict.ai_score}
+                # Plagiarism score | {overdict.plagiarism_score}
+                # Public link | [Originality.ai site]({overdict.public_link})""")
 
 
 hide_streamlit_style = """
