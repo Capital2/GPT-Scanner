@@ -278,7 +278,7 @@ class OriginalityVerdict:
         check_plagiarism = True,
         check_ai = True) -> str :
 
-        if not account_data.access_token:
+        if not hasattr(account_data, 'access_token'):
             account_data = OriginalityAccount._login(account_data)
 
         # the plagiarism detector needs a sentences breackdown to operate
