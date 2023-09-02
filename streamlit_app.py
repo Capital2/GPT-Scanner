@@ -1,7 +1,7 @@
 import os
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), os.path.pardir))
-
+from langdetect import detect
 import streamlit as st
 from gptzero import ZeroAccount, ZeroVerdict, ZeroVerdictData
 from originality import OriginalityAccount, OriginalityVerdict
@@ -65,8 +65,8 @@ if question_text_area:
 if st.button('✍🏻 Paraphrase'):
    with left:
         paraphrase_text_area.empty()
-    #paraphrase_text_area.text_area("paraphrased text from paraphraser.io",height=200,value=paraphrase(question_text_area,"fr"))
-        st.markdown(paraphrase(question_text_area,"fr"),unsafe_allow_html=True)
+        lang = detect(question_text_area)
+        st.markdown(paraphrase(question_text_area,lang=lang),unsafe_allow_html=True)
 if st.button('🔍 Scan'):
 
         with st.container():
@@ -103,14 +103,14 @@ if st.button('🔍 Scan'):
 
             with right:
                 st.header("Originality.ai")
-                st.write("originality Ai is under maintance")
-                # overdict = get_originality_scan(question_text_area)
-                # st.markdown(f"""
-                # |Metric|Value|
-                # |:--|------:|
-                # AI score | {overdict.ai_score}
-                # Plagiarism score | {overdict.plagiarism_score}
-                # Public link | [Originality.ai site]({overdict.public_link})""")
+                #st.write("originality Ai is under maintance")
+                overdict = get_originality_scan(question_text_area)
+                st.markdown(f"""
+                |Metric|Value|
+                |:--|------:|
+                AI score | {overdict.ai_score}
+                Plagiarism score | {overdict.plagiarism_score}
+                Public link | [Originality.ai site]({overdict.public_link})""")
 
 
 hide_streamlit_style = """
