@@ -65,7 +65,6 @@ with st.container():
         question_text_area = st.text_area('Paste content to scan (minimum 100 words):',height=200)
     with paraphraseText:
         if 'paraphrase' in st.session_state:
-            print("exist")
             st.markdown(
                 f'<div style="{container_style}">'
                 f'<p>"{st.session_state.paraphrase}"</p>'
@@ -73,7 +72,6 @@ with st.container():
                 unsafe_allow_html=True,
             )
         else:
-            print("not exist")
             st.markdown(
                 f'<div style="{container_style}">'
                 '<p></p>'
@@ -90,7 +88,7 @@ if question_text_area:
 if st.button('✍🏻 Paraphrase'):
     lang = detect(question_text_area)
     st.session_state.paraphrase = paraphrase(question_text_area,lang=lang)
-    print("finished")            
+    st.experimental_rerun()  
 
 
 if st.button('🔍 Scan'):
