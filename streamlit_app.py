@@ -98,7 +98,7 @@ if st.button('🔍 Scan'):
     st.session_state.zeroGPTVerdict = verdict
 
 with st.container():
-    left, middle, right = st.columns(3)
+    left, right = st.columns(2)
     with left:
         try :
             if 'zverdict' in st.session_state:
@@ -112,7 +112,7 @@ with st.container():
                 st.caption(f"*: burstiness is a measurement of the variation of the randomness of the text (burstiness over 90 is often regarded as human)")
         except Exception as e:
             st.write(f"GPTzero error: {e}")
-    with middle:
+    with right:
         if 'zeroGPTVerdict' in st.session_state:
             c1, c2 = st.columns(2)
             st.header("ZeroGPT")
@@ -128,17 +128,6 @@ with st.container():
             with st.container():
                 st.write("Additional Feedback:")
                 st.write(st.session_state.zeroGPTVerdict["additional_feedback"])
-
-    with right:
-        st.header("Originality.ai")
-        #st.write("originality Ai is under maintenance")
-        # overdict = get_originality_scan(question_text_area)
-        # st.markdown(f"""
-        # |Metric|Value|
-        # |:--|------:|
-        # AI score | {overdict.ai_score}
-        # Plagiarism score | {overdict.plagiarism_score}
-        # Public link | [Originality.ai site]({overdict.public_link})""")
 
 
 hide_streamlit_style = """
