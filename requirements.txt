@@ -17,3 +17,4 @@ streamlit
 MailGw-Temporary-Email
 Faker
 retrying
+ langdetect==1.0.9 
