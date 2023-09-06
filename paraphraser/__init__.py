@@ -1,6 +1,9 @@
 import requests
 import urllib.parse as parser
 import re
+import logging
+
+LOG = logging.getLogger(__name__)
 
 def paraphrase(data:str,lang:str)->str:
     """
@@ -20,11 +23,17 @@ def paraphrase(data:str,lang:str)->str:
 
     body = "data="+parser.quote_plus(data)+'+&mode=1&lang='+lang
 
+    LOG.debug(f"post request body: {body}")
     response = requests.post(url,  headers=headers, data=body)
+    LOG.info(f"POST request returned with {response}")
+    LOG.debug(f"response body: {response.text}")
+
     response =  response.json()
     paraphrasedText = response["result"]["paraphrase"]
     
     regex = "<span class='sw'>(.*?)</span>"
     result = re.findall(regex,paraphrasedText)
+    ret = ' '.join(result)
 
-    return ' '.join(result)
+    LOG.debug(f"paraphraser returned with: {ret}")
+    return ret
