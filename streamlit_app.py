@@ -13,6 +13,9 @@ from paraphraser import paraphrase
 
 logging.basicConfig(level=logging.INFO)
 
+if 'scan_paraphrased' not in  st.session_state:
+    st.session_state.scan_paraphrased = True
+
 def get_zero_scan(content: str) -> ZeroVerdictData:
 
     acc = ZeroAccount.get_from_local()
@@ -65,12 +68,12 @@ with st.container():
         question_text_area = st.text_area('Paste content to scan (minimum 100 words):',height=200)
     with paraphraseText:
         if 'paraphrase' in st.session_state:
-            st.markdown(
-                f'<div style="{container_style}">'
-                f'<p>"{st.session_state.paraphrase}"</p>'
-                '</div>',
-                unsafe_allow_html=True,
-            )
+                st.markdown(
+                    f'<div style="{container_style}">'
+                    f'<p>"{st.session_state.paraphrase}"</p>'
+                    '</div>',
+                    unsafe_allow_html=True,
+                )
         else:
             st.markdown(
                 f'<div style="{container_style}">'
@@ -85,36 +88,56 @@ if question_text_area:
     st.write(f"word count: {count}")
 
 
-if st.button('✍🏻 Paraphrase'):
-    lang = detect(question_text_area)
-    st.session_state.paraphrase = paraphrase(question_text_area,lang=lang)
-    st.experimental_rerun()  
-
-
-if st.button('🔍 Scan'):
-    zverdict = get_zero_scan(question_text_area)
-    st.session_state.zverdict = zverdict
-    verdict = zeroGPTVerdict(question_text_area)
-    st.session_state.zeroGPTVerdict = verdict
-
 with st.container():
     left, right = st.columns(2)
+    
     with left:
+        scan = st.button('🔍 Scan')
+        if scan:
+            with st.spinner('Investigating your text 🤖'):
+                zverdict = get_zero_scan(question_text_area)
+                st.session_state.zverdict = zverdict
+                verdict = zeroGPTVerdict(question_text_area)
+                st.session_state.zeroGPTVerdict = verdict
         try :
             if 'zverdict' in st.session_state:
                 st.header("GPTZero")
-                st.markdown(f"""
-                |Metric|Value|
-                |:--|--:|
-                Average generated probability | {st.session_state.zverdict.average_generated_prob}
-                Completely generated probablity | {st.session_state.zverdict.completely_generated_prob}
-                Overall burstiness* | {st.session_state.zverdict.overall_burstiness}""")
+                st.write("Average generated probability:")
+                st.write(round(st.session_state.zverdict.completely_generated_prob * 100,2) )
+                st.write("Overall burstiness*")
+                st.write(round(st.session_state.zverdict.overall_burstiness,2))
                 st.caption(f"*: burstiness is a measurement of the variation of the randomness of the text (burstiness over 90 is often regarded as human)")
         except Exception as e:
             st.write(f"GPTzero error: {e}")
+   
     with right:
+
+        c1,c2,c3,c4 = st.columns(4)
+        with c1:
+            paraphraseButton = st.button('✍🏻 Paraphrase text')
+            if paraphraseButton:
+                
+                with st.spinner("doing our best 💪"):
+                    lang = detect(question_text_area)
+                    st.session_state.paraphrase = paraphrase(question_text_area,lang=lang)
+                    st.session_state.scan_paraphrased = False
+                    st.experimental_rerun()  
+            
+        with c2:
+            rescan = st.button("🔍 Scan paraphrased text",disabled=st.session_state.scan_paraphrased)   
+            if rescan:
+                
+                with st.spinner('Investigating yout text 🤖'):
+                    text = st.session_state.paraphrase.replace("<b>","")
+                    text = text.replace("</b>","")
+                    text = text.replace("<br>","")
+                    zverdict = get_zero_scan(text)
+                    st.session_state.zverdict = zverdict
+                    verdict = zeroGPTVerdict(text)
+                    st.session_state.zeroGPTVerdict = verdict
+                    st.experimental_rerun()
+
         if 'zeroGPTVerdict' in st.session_state:
-            c1, c2 = st.columns(2)
             st.header("ZeroGPT")
             
             with st.container():
