@@ -97,17 +97,36 @@ if question_text_area:
 
 
 with st.container():
+    if scan:
+        with st.spinner('Investigating your text 🤖'):
+            zverdict = get_zero_scan(question_text_area)
+            st.session_state.zverdict = zverdict
+            verdict = zeroGPTVerdict(question_text_area)
+            st.session_state.zeroGPTVerdict = verdict
+            plagiarism = plagiarismChecker(question_text_area)
+            st.session_state.plagiarism = plagiarism
+    if paraphraseButton:
+            
+        with st.spinner("doing our best 💪"):
+            lang = detect(question_text_area)
+            st.session_state.paraphrase = paraphrase(question_text_area,lang=lang)
+            st.session_state.scan_paraphrased = False
+            st.experimental_rerun()  
+    if rescan:    
+        with st.spinner('Investigating yout text 🤖'):
+            text = st.session_state.paraphrase.replace("<b>","")
+            text = text.replace("</b>","")
+            text = text.replace("<br>","")
+            zverdict = get_zero_scan(text)
+            st.session_state.zverdict = zverdict
+            verdict = zeroGPTVerdict(text)
+            st.session_state.zeroGPTVerdict = verdict
+            st.experimental_rerun()
+    
+    
     left, middle ,right = st.columns(3)
     
     with left:
-        if scan:
-            with st.spinner('Investigating your text 🤖'):
-                zverdict = get_zero_scan(question_text_area)
-                st.session_state.zverdict = zverdict
-                verdict = zeroGPTVerdict(question_text_area)
-                st.session_state.zeroGPTVerdict = verdict
-                plagiarism = plagiarismChecker(question_text_area)
-                st.session_state.plagiarism = plagiarism
         try :
             if 'zverdict' in st.session_state:
                 st.header("GPTZero")
@@ -120,25 +139,6 @@ with st.container():
             st.write(f"GPTzero error: {e}")
    
     with middle:
-          
-        if paraphraseButton:
-                
-            with st.spinner("doing our best 💪"):
-                lang = detect(question_text_area)
-                st.session_state.paraphrase = paraphrase(question_text_area,lang=lang)
-                st.session_state.scan_paraphrased = False
-                st.experimental_rerun()  
-        if rescan:    
-            with st.spinner('Investigating yout text 🤖'):
-                text = st.session_state.paraphrase.replace("<b>","")
-                text = text.replace("</b>","")
-                text = text.replace("<br>","")
-                zverdict = get_zero_scan(text)
-                st.session_state.zverdict = zverdict
-                verdict = zeroGPTVerdict(text)
-                st.session_state.zeroGPTVerdict = verdict
-                st.experimental_rerun()
-
         if 'zeroGPTVerdict' in st.session_state:
             st.header("ZeroGPT")
             
