@@ -23,5 +23,3 @@ def plagiarismChecker(data:str)->list[dict]:
             query = {"text":item["query"],"link":"None"}
         list_of_queries.append(query)
     return list_of_queries
-
-print(plagiarismChecker("Visual Studio Code (VSCode) est un éditeur de code source et un environnement de développement intégré (IDE) de Microsoft. Il est open-source et cross-platform, c’est-à-dire qu’il fonctionne sur Windows, Linux et Mac. Il a été conçu pour les développeurs web, mais il prend en charge de nombreux autres langages de programmation tels que C++, C\#, Python, Java, etc."))
