@@ -17,4 +17,5 @@ streamlit
 MailGw-Temporary-Email
 Faker
 retrying
+ googlesearch-python==1.2.3 
  langdetect==1.0.9 
