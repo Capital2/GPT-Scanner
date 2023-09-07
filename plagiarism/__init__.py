@@ -1,7 +1,7 @@
 import requests
 import urllib.parse as parser
 from googlesearch import search
-
+from difflib import SequenceMatcher
 import logging
 
 LOG = logging.getLogger(__name__)
@@ -36,9 +36,19 @@ def plagiarismChecker(data:str)->list[dict]:
     return list_of_queries
 
 
-def plagiarismDetector(data:str,lang)->dict:
+def plagiarismDetector(data:str,lang)->list[dict]:
     result = search(data, advanced=True,num_results=1,lang=lang)
     links = []
+    
     for res in result:
-        links.append(res.url)
+        match = SequenceMatcher(None,res.description,data)
+        percentage = match.ratio() * 100
+        link_percentage = {"link":res.url,"percentage":int(percentage)}
+        links.append(link_percentage)
+    
+    links = sorted(links,key=lambda k: k["percentage"],reverse=True)
+    
+    for i in links:
+        i.pop('percentage')
+        
     return links
