@@ -11,8 +11,25 @@ from dataclasses import asdict
 import pandas as pd
 from paraphraser import paraphrase
 from plagiarism import plagiarismDetector
+import random
 
 logging.basicConfig(level=logging.INFO)
+
+loading_msgs=[
+      "Upgrading Windows, your PC will restart several times. Sit back and relax.",
+        "Have a good day.",
+        "We're building the buildings as fast as we can",
+        "Don't worry - a few bits tried to escape, but we caught them",
+        "The server is powered by a potato and two electrodes.",
+        "We're testing your patience",
+        "Just count to 5",
+        "Mining some bitcoins...",
+        "Downloading more RAM..",
+        "Updating to Windows Vista...",
+        "Deleting System32 folder",
+        "ctrl-w speeds things up.",
+        "doing our best 💪",
+]
 
 if 'scan_paraphrased' not in  st.session_state:
     st.session_state.scan_paraphrased = True
@@ -99,7 +116,7 @@ if question_text_area:
 
 with st.container():
     if scan:
-        with st.spinner('Investigating your text 🤖'):
+        with st.spinner(random.choice(loading_msgs)):
             zverdict = get_zero_scan(question_text_area)
             st.session_state.zverdict = zverdict
             verdict = zeroGPTVerdict(question_text_area)
@@ -108,12 +125,13 @@ with st.container():
             st.session_state.plagiarism = plagiarism
     if paraphraseButton:
             
-        with st.spinner("doing our best 💪"):
+
+        with st.spinner(random.choice(loading_msgs)):
             st.session_state.paraphrase = paraphrase(question_text_area,lang=lang)
             st.session_state.scan_paraphrased = False
             st.experimental_rerun()  
     if rescan:    
-        with st.spinner('Investigating yout text 🤖'):
+        with st.spinner(random.choice(loading_msgs)):
             text = st.session_state.paraphrase.replace("<b>","")
             text = text.replace("</b>","")
             text = text.replace("<br>","")
