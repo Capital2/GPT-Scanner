@@ -10,7 +10,7 @@ import logging
 from dataclasses import asdict
 import pandas as pd
 from paraphraser import paraphrase
-from plagiarism import plagiarismChecker
+from plagiarism import plagiarismDetector
 
 logging.basicConfig(level=logging.INFO)
 
@@ -92,6 +92,7 @@ with st.container():
                 rescan = st.button("🔍 Scan paraphrased text",disabled=st.session_state.scan_paraphrased)
 
 if question_text_area:
+    lang = detect(question_text_area)
     count = sum(1 for c in question_text_area if c in ' \t\n') + 1
     st.write(f"word count: {count}")
 
@@ -103,12 +104,11 @@ with st.container():
             st.session_state.zverdict = zverdict
             verdict = zeroGPTVerdict(question_text_area)
             st.session_state.zeroGPTVerdict = verdict
-            plagiarism = plagiarismChecker(question_text_area)
+            plagiarism = plagiarismDetector(question_text_area,lang)
             st.session_state.plagiarism = plagiarism
     if paraphraseButton:
             
         with st.spinner("doing our best 💪"):
-            lang = detect(question_text_area)
             st.session_state.paraphrase = paraphrase(question_text_area,lang=lang)
             st.session_state.scan_paraphrased = False
             st.experimental_rerun()  
@@ -156,6 +156,7 @@ with st.container():
     with right:
         if 'plagiarism' in st.session_state:
             st.header("Plagiarism checker")
+            st.write("found your text in")
             with st.container():
                 st.write(st.session_state.plagiarism)
 

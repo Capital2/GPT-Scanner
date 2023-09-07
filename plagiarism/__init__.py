@@ -1,5 +1,7 @@
 import requests
 import urllib.parse as parser
+from googlesearch import search
+
 def plagiarismChecker(data:str)->list[dict]:
     url = "https://seomagnifier.com/online-plagiarism-checker/check"
 
@@ -23,3 +25,11 @@ def plagiarismChecker(data:str)->list[dict]:
             query = {"text":item["query"],"link":"None"}
         list_of_queries.append(query)
     return list_of_queries
+
+
+def plagiarismDetector(data:str,lang)->dict:
+    result = search(data, advanced=True,num_results=1,lang=lang)
+    links = []
+    for res in result:
+        links.append(res.url)
+    return links
