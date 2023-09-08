@@ -10,7 +10,7 @@ import logging
 from dataclasses import asdict
 import pandas as pd
 from paraphraser import paraphrase
-from plagiarism import plagiarismDetector
+from plagiarism import turnitinPlagaiarsimChecker
 import random
 
 logging.basicConfig(level=logging.INFO)
@@ -33,6 +33,9 @@ loading_msgs=[
 
 if 'scan_paraphrased' not in  st.session_state:
     st.session_state.scan_paraphrased = True
+
+if "recheck_plagiarism" not in st.session_state:
+    st.session_state.recheck_plagiarism = True
 
 def get_zero_scan(content: str) -> ZeroVerdictData:
 
@@ -84,29 +87,36 @@ with st.container():
     textInput, paraphraseText = st.columns(2)
     with textInput:
         question_text_area = st.text_area('Paste content to scan (minimum 100 words):',height=200)
-        scan = st.button('🔍 Scan')
+        c1,c2,c3,c4 = st.columns(4)
+        with c1:
+            scan = st.button('🔍 Scan for AI')
+        with c2:
+            plagiarism = st.button("📜 check plagiarism")
+
     with paraphraseText:
-        with st.container():
-            if 'paraphrase' in st.session_state:
-                    st.markdown(
-                        f'<div style="{container_style}">'
-                        f'<p>"{st.session_state.paraphrase}"</p>'
-                        '</div>',
-                        unsafe_allow_html=True,
-                    )
-            else:
+
+        if 'paraphrase' in st.session_state:
                 st.markdown(
                     f'<div style="{container_style}">'
-                    '<p></p>'
+                    f'<p>"{st.session_state.paraphrase}"</p>'
                     '</div>',
                     unsafe_allow_html=True,
                 )
-            st.markdown("<br>",unsafe_allow_html=True)
-            c1,c2,c3,c4 = st.columns(4)
-            with c1:
-                paraphraseButton = st.button('✍🏻 Paraphrase text')
-            with c2:
-                rescan = st.button("🔍 Scan paraphrased text",disabled=st.session_state.scan_paraphrased)
+        else:
+            st.markdown(
+                f'<div style="{container_style}">'
+                '<p></p>'
+                '</div>',
+                unsafe_allow_html=True,
+            )
+        st.markdown("<br>",unsafe_allow_html=True)
+        c1,c2,c3,c4 = st.columns(4)
+        with c1:
+            paraphraseButton = st.button('✍🏻 Paraphrase text')
+        with c2:
+            rescan = st.button("🔍 Rescan for AI",disabled=st.session_state.scan_paraphrased)
+        with c3:
+            reCheckPlagiarism = st.button("📜 recheck plagiarism",disabled=st.session_state.recheck_plagiarism)
 
 if question_text_area:
     lang = detect(question_text_area)
@@ -115,20 +125,22 @@ if question_text_area:
 
 
 with st.container():
+    if plagiarism:
+        with st.spinner(random.choice(loading_msgs)):
+            plagiarism_result = turnitinPlagaiarsimChecker(question_text_area,lang)
+            st.session_state.plagiarism = plagiarism_result
     if scan:
         with st.spinner(random.choice(loading_msgs)):
             zverdict = get_zero_scan(question_text_area)
             st.session_state.zverdict = zverdict
             verdict = zeroGPTVerdict(question_text_area)
             st.session_state.zeroGPTVerdict = verdict
-            plagiarism = plagiarismDetector(question_text_area,lang)
-            st.session_state.plagiarism = plagiarism
-    if paraphraseButton:
             
-
+    if paraphraseButton:   
         with st.spinner(random.choice(loading_msgs)):
             st.session_state.paraphrase = paraphrase(question_text_area,lang=lang)
             st.session_state.scan_paraphrased = False
+            st.session_state.recheck_plagiarism = False
             st.experimental_rerun()  
     if rescan:    
         with st.spinner(random.choice(loading_msgs)):
@@ -139,6 +151,14 @@ with st.container():
             st.session_state.zverdict = zverdict
             verdict = zeroGPTVerdict(text)
             st.session_state.zeroGPTVerdict = verdict
+            st.experimental_rerun()
+    if reCheckPlagiarism:
+        with st.spinner(random.choice(loading_msgs)):
+            text = st.session_state.paraphrase.replace("<b>","")
+            text = text.replace("</b>","")
+            text = text.replace("<br>","")
+            plagiarism_result = turnitinPlagaiarsimChecker(text,lang)
+            st.session_state.plagiarism = plagiarism_result
             st.experimental_rerun()
     
     
@@ -173,10 +193,17 @@ with st.container():
                 st.write(st.session_state.zeroGPTVerdict["additional_feedback"])
     with right:
         if 'plagiarism' in st.session_state:
-            st.header("Plagiarism checker")
-            st.write("found your text in")
-            with st.container():
-                st.write(st.session_state.plagiarism)
+            st.header("Turnitin Plagiarism checker")
+            st.write(f"Your overall text plagirism:")
+            st.write(float(st.session_state.plagiarism['turnitin_index']))
+            st.write("highest match website:")
+            st.write(st.session_state.plagiarism['match']['url'] )
+            st.write("text detected")
+            splited_text = question_text_area.split()
+            for i in st.session_state.plagiarism['match']['highlight']:
+                st.write(f"<b>{' '.join(splited_text[int(i[0]):int(i[1])])}</b>",unsafe_allow_html=True)
+            st.caption("Turnitin is powerful tool for plagiarism check and it is widely used by multiple universities, naming few tunisian universities: using turnitin \
+                       Université de Carthage, université de sousse, INAT, ENIM...")
 
 hide_streamlit_style = """
             <style>
