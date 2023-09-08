@@ -59,7 +59,11 @@ def turnitinPlagaiarsimChecker(data:str,lang:str)->dict:
     r = requests.post(burp0_url, headers=burp0_headers, cookies=burp0_cookies, data=burp0_data)
 
     result = json.loads(r.text)
+
     #result contains word_count:int, percent:float, matches:list[dict]
     #matches contains url:str ,percent:float ,highlight:list[list]
     
-    return {"turnitin_index":str(100 - float(result["percent"])),"match":result["matches"][0]}#getting only the first match which is the highest match percentage
+    return {
+        "turnitin_index": str(100 - float(result["percent"])),
+        "match": result["matches"][0] if len(result["matches"])>0 else None #getting only the first match which is the highest match percentage among all links
+        } 

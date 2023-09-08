@@ -86,7 +86,7 @@ container_style = """
 with st.container():
     textInput, paraphraseText = st.columns(2)
     with textInput:
-        question_text_area = st.text_area('Paste content to scan (minimum 100 words):',height=200)
+        question_text_area = st.text_area('Paste content to scan (minimum 100 words for better AI scan):',height=200,max_chars=2000)
         c1,c2,c3,c4 = st.columns(4)
         with c1:
             scan = st.button('🔍 Scan for AI')
@@ -197,12 +197,17 @@ with st.container():
             st.write(f"Your overall text plagirism:")
             st.write(float(st.session_state.plagiarism['turnitin_index']))
             st.write("highest match website:")
-            st.write(st.session_state.plagiarism['match']['url'] )
-            st.write("text detected")
-            splited_text = question_text_area.split()
-            for i in st.session_state.plagiarism['match']['highlight']:
-                st.write(f"<b>{' '.join(splited_text[int(i[0]):int(i[1])])}</b>",unsafe_allow_html=True)
-            st.caption("Turnitin is powerful tool for plagiarism check and it is widely used by multiple universities, naming few tunisian universities: using turnitin \
+            if st.session_state.plagiarism["match"] is not None:
+                st.write(st.session_state.plagiarism['match']['url'] )
+                st.write("text detected")
+                splited_text = question_text_area.split()
+                for i in st.session_state.plagiarism['match']['highlight']:
+                    st.write(f"<b>{' '.join(splited_text[int(i[0]):int(i[1])])}</b>",unsafe_allow_html=True)
+            else:
+                st.write("None")
+                st.write("text detected")
+                st.write("your text is unique")
+            st.caption("Turnitin is powerful tool for plagiarism check and it is widely used by multiple universities, naming few tunisian universities using turnitin \
                        Université de Carthage, université de sousse, INAT, ENIM...")
 
 hide_streamlit_style = """
