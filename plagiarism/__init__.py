@@ -1,45 +1,13 @@
-# import requests
-# import urllib.parse as parser
-# from googlesearch import search
-# from difflib import SequenceMatcher
-# import logging
-
-# LOG = logging.getLogger(__name__)
-
-# def plagiarismChecker(data:str)->list[dict]:
-#     url = "https://seomagnifier.com/online-plagiarism-checker/check"
-#     ultraSuperSecureSecretToken="ggggggg"
-#     headers = {
-#     "User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/116.0",
-#     "Accept": "application/json, text/javascript, */*; q=0.01",
-#     "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-#     "X-Requested-With": "XMLHttpRequest",
-#     }
-#     data = data.replace(".","_sysbreak_[--atozbreak--]")
-    
-#     body = "queries="+parser.quote_plus(data)+f"&SecureToken={ultraSuperSecureSecretToken}"
-#     LOG.debug(f"post request body: {body}")
-#     response = requests.post(url,  headers=headers, data=body)
-#     LOG.info(f"POST request returned with {response}")
-#     LOG.debug(f"response body: {response.text}")
-#     response = response.json()['details']
-#     list_of_queries = []
-    
-#     for item in response:
-#         if item["unique"] == False:
-#             query = {"text":item["query"],"link":item["webs"][0]["url"]}
-#         else:
-#             query = {"text":item["query"],"link":"None"}
-#         list_of_queries.append(query)
-#     LOG.debug(f"plag checker returned with: {list_of_queries}")
-
-#     return list_of_queries
-
 import requests
 import json
+import logging
+
+LOG = logging.getLogger(__name__)
+
+
 def turnitinPlagaiarsimChecker(data:str,lang:str)->dict:
     """
-    credits to:    https://github.com/SegYT/turnitinFree
+    credits to:    [SegYT](https://github.com/SegYT/turnitinFree)
 
     Return
     -----------------
@@ -56,12 +24,14 @@ def turnitinPlagaiarsimChecker(data:str,lang:str)->dict:
 
     burp0_data = {"is_free": "false", "plagchecker_locale": lang, "product_paper_type": "1", "title": '', "text": data}
 
+    LOG.debug(f"post request body: {data}")
     r = requests.post(burp0_url, headers=burp0_headers, cookies=burp0_cookies, data=burp0_data)
-
+    LOG.info(f"POST request returned with {r}")
+    LOG.debug(f"response body: {r.text}")
     result = json.loads(r.text)
 
-    #result contains word_count:int, percent:float, matches:list[dict]
-    #matches contains url:str ,percent:float ,highlight:list[list]
+    # result contains word_count:int, percent:float, matches:list[dict]
+    # matches contains url:str ,percent:float ,highlight:list[list]
     
     return {
         "turnitin_index": str(100 - float(result["percent"])),

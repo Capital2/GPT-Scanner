@@ -89,7 +89,7 @@ with st.container():
         question_text_area = st.text_area('Paste content to scan (minimum 100 words for better AI scan):',height=200,max_chars=2000)
         c1,c2,c3,c4 = st.columns(4)
         with c1:
-            scan = st.button('🔍 Scan for AI')
+            scan = st.button('🔍 scan for AI')
         with c2:
             plagiarism = st.button("📜 check plagiarism")
 
@@ -112,9 +112,9 @@ with st.container():
         st.markdown("<br>",unsafe_allow_html=True)
         c1,c2,c3,c4 = st.columns(4)
         with c1:
-            paraphraseButton = st.button('✍🏻 Paraphrase text')
+            paraphraseButton = st.button('✍🏻 paraphrase text')
         with c2:
-            rescan = st.button("🔍 Rescan for AI",disabled=st.session_state.scan_paraphrased)
+            rescan = st.button("🔍 rescan for AI",disabled=st.session_state.scan_paraphrased)
         with c3:
             reCheckPlagiarism = st.button("📜 recheck plagiarism",disabled=st.session_state.recheck_plagiarism)
 
