@@ -7,7 +7,6 @@ from gptzero import ZeroAccount, ZeroVerdict, ZeroVerdictData
 from originality import OriginalityAccount, OriginalityVerdict
 from zeroGPT import zeroGPTVerdict
 import logging
-from dataclasses import asdict
 import pandas as pd
 from paraphraser import paraphrase
 from plagiarism import turnitinPlagaiarsimChecker
