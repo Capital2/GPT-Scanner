@@ -77,6 +77,7 @@ container_style = """
     height: 205px; 
     width: 100%;    
 """
+
 def custom_progress_bar(value):
     
     if value <= 15:
@@ -109,23 +110,22 @@ with st.container():
                 lang = detect(question_text_area)
                 count = sum(1 for c in question_text_area if c in ' \t\n') + 1
                 st.write(f"word count: {count}")
-
     with paraphraseText:
-
-        if 'paraphrase' in st.session_state:
-                st.markdown(
-                    f'<div style="{container_style}">'
-                    f'<p>"{st.session_state.paraphrase}"</p>'
-                    '</div>',
-                    unsafe_allow_html=True,
-                )
-        else:
+        if 'paraphrase' not in st.session_state:
             st.markdown(
                 f'<div style="{container_style}">'
                 '<p></p>'
                 '</div>',
                 unsafe_allow_html=True,
             )
+        else:
+            st.markdown(
+                f'<div style="{container_style}">'
+                f'<p>"{st.session_state.paraphrase}"</p>'
+                '</div>',
+                unsafe_allow_html=True,)
+
+
         st.markdown("<br>",unsafe_allow_html=True)
         c1,c2,c3,c4 = st.columns(4)
         with c1:
@@ -149,10 +149,11 @@ with st.container():
             
     if paraphraseButton:   
         with st.spinner(random.choice(loading_msgs)):
-            st.session_state.paraphrase = paraphrase(question_text_area,lang=lang)
             st.session_state.scan_paraphrased = False
             st.session_state.recheck_plagiarism = False
-            st.experimental_rerun()  
+            st.session_state.paraphrase = paraphrase(question_text_area,lang=lang)
+            st.experimental_rerun()
+            
     if rescan:    
         with st.spinner(random.choice(loading_msgs)):
             text = st.session_state.paraphrase.replace("<b>","")
@@ -162,7 +163,7 @@ with st.container():
             st.session_state.zverdict = zverdict
             verdict = zeroGPTVerdict(text)
             st.session_state.zeroGPTVerdict = verdict
-            st.experimental_rerun()
+
     if reCheckPlagiarism:
         with st.spinner(random.choice(loading_msgs)):
             text = st.session_state.paraphrase.replace("<b>","")
@@ -170,7 +171,6 @@ with st.container():
             text = text.replace("<br>","")
             plagiarism_result = turnitinPlagaiarsimChecker(text,lang)
             st.session_state.plagiarism = plagiarism_result
-            st.experimental_rerun()
     
     
     left, middle ,right = st.columns(3)
@@ -214,6 +214,7 @@ with st.container():
             custom_progress_bar(plagiarismValue)   
             if st.session_state.plagiarism["match"] is not None:
                 suspected_text = []
+                st.text("Highest match website:")
                 st.write(st.session_state.plagiarism['match']['url'] )
                 st.text("text detected:")
                 splited_text = question_text_area.split()
