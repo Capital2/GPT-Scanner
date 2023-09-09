@@ -124,9 +124,12 @@ if question_text_area:
 
 with st.container():
     if plagiarism:
-        with st.spinner(random.choice(loading_msgs)):
-            plagiarism_result = turnitinPlagaiarsimChecker(question_text_area,lang)
-            st.session_state.plagiarism = plagiarism_result
+        if count<15:
+            st.error("to check for plagiarism you need to provide 15 word at least!")
+        else:
+            with st.spinner(random.choice(loading_msgs)):
+                plagiarism_result = turnitinPlagaiarsimChecker(question_text_area,lang)
+                st.session_state.plagiarism = plagiarism_result
     if scan:
         with st.spinner(random.choice(loading_msgs)):
             zverdict = get_zero_scan(question_text_area)
