@@ -10,6 +10,7 @@ import logging
 from paraphraser import paraphrase
 from plagiarism import turnitinPlagaiarsimChecker
 import random
+from math import ceil
 
 logging.basicConfig(level=logging.INFO)
 
@@ -53,10 +54,6 @@ def get_originality_scan(content: str):
     res = OriginalityVerdict.free_get(content, account, )
     return res
 
-def display_word_count(text):
-    count = sum(1 for c in text if c in ' \t\n')
-    return st.write(f"word count: {count}")
-
 # Set page configuration and add header
 st.set_page_config(
     page_title="GPT Scanner",
@@ -69,7 +66,7 @@ st.set_page_config(
         'About': "https://github.com/Capital2/GPT-Scanner",
     },
 )
-st.header('GPT Scanner')
+st.title('GPT Scanner')
 
 container_style = """
     background-color: #262730;
@@ -78,8 +75,25 @@ container_style = """
     border-radius: 5px;
     overflow-y: auto;
     height: 205px; 
-    width: 100%;
+    width: 100%;    
 """
+def custom_progress_bar(value):
+    
+    if value <= 15:
+        background_color = '#4CAF50'  # Green
+    elif value <= 50:
+        background_color = '#FFC300'  # Yellow
+    elif value <= 75:
+        background_color = '#FF5733'  # Orange
+    else:
+        background_color = 'red'  # Red
+
+    progress_bar_html = f"""
+    <div style ="width: 70%; border-radius: 5px; background-color: #262730;">
+        <div style="width: {value}%; height: 10px; text-align: center; line-height: 10px; border-radius: 5px; background-color: {background_color}; display: flex; flex-direction: column; align-items: center; margin: -20px 0;"></div>
+    </div>
+    """
+    st.markdown(progress_bar_html, unsafe_allow_html=True)
 
 with st.container():
     textInput, paraphraseText = st.columns(2)
@@ -90,6 +104,11 @@ with st.container():
             scan = st.button('🔍 scan for AI')
         with c2:
             plagiarism = st.button("📜 check plagiarism")
+        with c4:
+            if question_text_area:
+                lang = detect(question_text_area)
+                count = sum(1 for c in question_text_area if c in ' \t\n') + 1
+                st.write(f"word count: {count}")
 
     with paraphraseText:
 
@@ -115,12 +134,6 @@ with st.container():
             rescan = st.button("🔍 rescan for AI",disabled=st.session_state.scan_paraphrased)
         with c3:
             reCheckPlagiarism = st.button("📜 recheck plagiarism",disabled=st.session_state.recheck_plagiarism)
-
-if question_text_area:
-    lang = detect(question_text_area)
-    count = sum(1 for c in question_text_area if c in ' \t\n') + 1
-    st.write(f"word count: {count}")
-
 
 with st.container():
     if plagiarism:
@@ -166,9 +179,11 @@ with st.container():
         try :
             if 'zverdict' in st.session_state:
                 st.header("GPTZero")
-                st.write("Average generated probability:")
-                st.write(round(st.session_state.zverdict.completely_generated_prob * 100,2) )
-                st.write("Overall burstiness*")
+                st.text("Average generated probability:")
+                gptZeroValue = ceil(st.session_state.zverdict.completely_generated_prob * 100)
+                st.write(f"{gptZeroValue}%")
+                custom_progress_bar(gptZeroValue)   
+                st.text("Overall burstiness*")
                 st.write(round(st.session_state.zverdict.overall_burstiness,2))
                 st.caption(f"*: burstiness is a measurement of the variation of the randomness of the text (burstiness over 90 is often regarded as human)")
         except Exception as e:
@@ -179,31 +194,35 @@ with st.container():
             st.header("ZeroGPT")
             
             with st.container():
-                    st.write("Average generated probability:")
-                    st.write(st.session_state.zeroGPTVerdict["ai_percentage"])
-                    
+                    st.text("Average generated probability:")
+                    zeroGptValue = ceil(st.session_state.zeroGPTVerdict['ai_percentage'])
+                    st.write(f"{zeroGptValue}%")
+                    custom_progress_bar(zeroGptValue) 
             with st.container():
-                st.write("Suspected Generated Text:")
+                st.text("Suspected Generated Text:")
                 st.write(st.session_state.zeroGPTVerdict["suspected_text"])
                 
             with st.container():
                 st.write("Additional Feedback:")
-                st.write(st.session_state.zeroGPTVerdict["additional_feedback"])
+                st.write(f"<p style='color:orange';>{st.session_state.zeroGPTVerdict['additional_feedback']}</p>",unsafe_allow_html=True)
     with right:
         if 'plagiarism' in st.session_state:
             st.header("Turnitin Plagiarism checker")
-            st.write(f"Your overall text plagirism:")
-            st.write(float(st.session_state.plagiarism['turnitin_index']))
-            st.write("highest match website:")
+            st.text(f"Your overall text plagirism:")
+            plagiarismValue = ceil(float(st.session_state.plagiarism['turnitin_index']))
+            st.write(f"{plagiarismValue}%")
+            custom_progress_bar(plagiarismValue)   
             if st.session_state.plagiarism["match"] is not None:
+                suspected_text = []
                 st.write(st.session_state.plagiarism['match']['url'] )
-                st.write("text detected")
+                st.text("text detected:")
                 splited_text = question_text_area.split()
                 for i in st.session_state.plagiarism['match']['highlight']:
-                    st.write(f"<b>{' '.join(splited_text[int(i[0]):int(i[1])])}</b>",unsafe_allow_html=True)
+                    suspected_text.append(' '.join(splited_text[int(i[0]):int(i[1])]))
+                st.write(suspected_text)
             else:
                 st.write("None")
-                st.write("text detected")
+                st.text("text detected:")
                 st.write("your text is unique")
             st.caption("Turnitin is powerful tool for plagiarism check and it is widely used by multiple universities, naming few tunisian universities using turnitin \
                        Université de Carthage, université de sousse, INAT, ENIM...")
