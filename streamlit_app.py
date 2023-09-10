@@ -172,10 +172,18 @@ with st.container():
             text = text.replace("<br>","")
 
             zverdict = get_zero_scan(text)
+            if "zverdict" not in st.session_state:
+                st.session_state.zverdict = ZeroVerdictData(
+                    average_generated_prob=0,
+                    completely_generated_prob=0,
+                    overall_burstiness=0
+                    )
             st.session_state.zverdictDelta = ceil(zverdict.completely_generated_prob * 100 - st.session_state.zverdict.completely_generated_prob *100)
             st.session_state.zverdict = zverdict
 
             verdict = zeroGPTVerdict(text)
+            if "zeroGPTVerdict" not in st.session_state:
+                st.session_state.zeroGPTVerdict = {"ai_percentage":0} 
             st.session_state.zeroGPTVerdictDelta = verdict['ai_percentage'] - st.session_state.zeroGPTVerdict['ai_percentage']
             st.session_state.zeroGPTVerdict = verdict
             
@@ -188,6 +196,8 @@ with st.container():
             text = text.replace("</b>","")
             text = text.replace("<br>","")
             plagiarism_result = turnitinPlagaiarsimChecker(text,lang)
+            if "plagiarism" not in st.session_state:
+                st.session_state.plagiarism = {"turnitin_index":0}
             st.session_state.plagiarismDelta = float(plagiarism_result["turnitin_index"]) - float(st.session_state.plagiarism["turnitin_index"])
             st.session_state.plagiarism = plagiarism_result
             
