@@ -30,8 +30,8 @@ def turnitinPlagaiarsimChecker(data:str,lang:str)->dict:
     LOG.debug(f"response body: {r.text}")
     result = json.loads(r.text)
 
-    # result contains word_count:int, percent:float, matches:list[dict]
-    # matches contains url:str ,percent:float ,highlight:list[list]
+    # result contains word_count:int, percent:str, matches:list[dict]
+    # matches contains url:str ,percent:dtr ,highlight:list[list]
     
     return {
         "turnitin_index": str(100 - float(result["percent"])),

@@ -77,7 +77,12 @@ container_style = """
     height: 205px; 
     width: 100%;    
 """
-
+metric_style = """
+.css-1xarl3l{
+    font-size: 1.2rem;
+}
+"""
+st.markdown(f"<style>{metric_style}</style>",unsafe_allow_html=True)
 def custom_progress_bar(value):
     
     if value <= 15:
@@ -91,7 +96,7 @@ def custom_progress_bar(value):
 
     progress_bar_html = f"""
     <div style ="width: 70%; border-radius: 5px; background-color: #262730;">
-        <div style="width: {value}%; height: 10px; text-align: center; line-height: 10px; border-radius: 5px; background-color: {background_color}; display: flex; flex-direction: column; align-items: center; margin: -20px 0;"></div>
+        <div style="width: {value}%; height: 10px; text-align: center; line-height: 10px; border-radius: 5px; background-color: {background_color}; display: flex; flex-direction: column; align-items: center; margin: -12px 0;"></div>
     </div>
     """
     st.markdown(progress_bar_html, unsafe_allow_html=True)
@@ -140,12 +145,15 @@ with st.container():
         with st.spinner(random.choice(loading_msgs)):
             plagiarism_result = turnitinPlagaiarsimChecker(question_text_area,lang)
             st.session_state.plagiarism = plagiarism_result
+            st.session_state.plagiarismDelta = plagiarism_result["turnitin_index"]
     if scan:
         with st.spinner(random.choice(loading_msgs)):
             zverdict = get_zero_scan(question_text_area)
             st.session_state.zverdict = zverdict
+            st.session_state.zverdictDelta = ceil(zverdict.completely_generated_prob * 100)
             verdict = zeroGPTVerdict(question_text_area)
             st.session_state.zeroGPTVerdict = verdict
+            st.session_state.zeroGPTVerdictDelta = verdict["ai_percentage"]
             
     if paraphraseButton:   
         with st.spinner(random.choice(loading_msgs)):
@@ -159,10 +167,17 @@ with st.container():
             text = st.session_state.paraphrase.replace("<b>","")
             text = text.replace("</b>","")
             text = text.replace("<br>","")
+
             zverdict = get_zero_scan(text)
+            st.session_state.zverdictDelta = ceil(zverdict.completely_generated_prob * 100 - st.session_state.zverdict.completely_generated_prob *100)
             st.session_state.zverdict = zverdict
+
             verdict = zeroGPTVerdict(text)
+            st.session_state.zeroGPTVerdictDelta = verdict['ai_percentage'] - st.session_state.zeroGPTVerdict['ai_percentage']
             st.session_state.zeroGPTVerdict = verdict
+            
+
+
 
     if reCheckPlagiarism:
         with st.spinner(random.choice(loading_msgs)):
@@ -170,7 +185,9 @@ with st.container():
             text = text.replace("</b>","")
             text = text.replace("<br>","")
             plagiarism_result = turnitinPlagaiarsimChecker(text,lang)
+            st.session_state.plagiarismDelta = float(plagiarism_result["turnitin_index"]) - float(st.session_state.plagiarism["turnitin_index"])
             st.session_state.plagiarism = plagiarism_result
+            
     
     
     left, middle ,right = st.columns(3)
@@ -179,9 +196,8 @@ with st.container():
         try :
             if 'zverdict' in st.session_state:
                 st.header("GPTZero")
-                st.text("Average generated probability:")
                 gptZeroValue = ceil(st.session_state.zverdict.completely_generated_prob * 100)
-                st.write(f"{gptZeroValue}%")
+                st.metric(label="Average generated probability:",value=f"{gptZeroValue}%", delta=f"{st.session_state.zverdictDelta}%", delta_color="inverse")
                 custom_progress_bar(gptZeroValue)   
                 st.text("Overall burstiness*")
                 st.write(round(st.session_state.zverdict.overall_burstiness,2))
@@ -192,11 +208,9 @@ with st.container():
     with middle:
         if 'zeroGPTVerdict' in st.session_state:
             st.header("ZeroGPT")
-            
             with st.container():
-                    st.text("Average generated probability:")
                     zeroGptValue = ceil(st.session_state.zeroGPTVerdict['ai_percentage'])
-                    st.write(f"{zeroGptValue}%")
+                    st.metric(label="Average generated probability:",value=f"{zeroGptValue}%", delta=f"{ceil(st.session_state.zeroGPTVerdictDelta)}%", delta_color="inverse")
                     custom_progress_bar(zeroGptValue) 
             with st.container():
                 st.text("Suspected Generated Text:")
@@ -208,9 +222,8 @@ with st.container():
     with right:
         if 'plagiarism' in st.session_state:
             st.header("Turnitin Plagiarism checker")
-            st.text(f"Your overall text plagirism:")
             plagiarismValue = ceil(float(st.session_state.plagiarism['turnitin_index']))
-            st.write(f"{plagiarismValue}%")
+            st.metric(label="Your overall text plagirism:",value=f"{plagiarismValue}%", delta=f"{ceil(float(st.session_state.plagiarismDelta))}%", delta_color="inverse")
             custom_progress_bar(plagiarismValue)   
             if st.session_state.plagiarism["match"] is not None:
                 suspected_text = []
