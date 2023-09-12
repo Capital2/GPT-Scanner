@@ -12,7 +12,13 @@ from plagiarism import turnitinPlagaiarsimChecker
 import random
 from math import ceil
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    filename="logs.txt",
+    filemode='a',
+    format='%(asctime)s %(levelname)-8s %(message)s',
+    level=logging.INFO,
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
 
 loading_msgs=[
       "Upgrading Windows, your PC will restart several times. Sit back and relax.",
