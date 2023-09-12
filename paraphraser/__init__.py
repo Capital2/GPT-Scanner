@@ -5,7 +5,7 @@ import logging
 
 LOG = logging.getLogger(__name__)
 
-def paraphrase(data:str,lang:str)->str:
+def paraphrase(data:str,lang:str,mode:str)->str:
     """
     ``lang:`` fr / en
     """
@@ -21,7 +21,7 @@ def paraphrase(data:str,lang:str)->str:
     "Referer": "https://www.paraphraser.io/fr/outil-de-paraphrase"
     }
 
-    body = "data="+parser.quote_plus(data)+'+&mode=1&lang='+lang
+    body = "data="+parser.quote_plus(data)+'+&mode='+mode+'&lang='+lang
 
     LOG.info(f"post request body: {body}")
     response = requests.post(url,  headers=headers, data=body)
@@ -29,11 +29,14 @@ def paraphrase(data:str,lang:str)->str:
     LOG.info(f"response body: {response.text}")
 
     response =  response.json()
-    paraphrasedText = response["result"]["paraphrase"]
-    
-    regex = "<span class='sw'>(.*?)</span>"
-    result = re.findall(regex,paraphrasedText)
-    ret = ' '.join(result)
+    if mode == "3" or (mode =="4" and lang =="fr"):
+        paraphrasedText = response["result"]["paraphrase"]
+        regex = "<span class='sw'>(.*?)</span>"
+        result = re.findall(regex,paraphrasedText)
+        ret = ' '.join(result)
+    elif mode == "5" or (mode == "4" and lang == "en"):
+        paraphrasedText = response["result"]["final_result"]
+        ret = paraphrasedText
 
     LOG.info(f"paraphraser returned with: {ret}")
     return ret

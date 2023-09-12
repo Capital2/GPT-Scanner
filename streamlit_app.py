@@ -72,6 +72,13 @@ st.set_page_config(
         'About': "https://github.com/Capital2/GPT-Scanner",
     },
 )
+
+def modeToNum():
+    if option =="Creative":
+        return "3"
+    elif option == "Smart":
+        return "4"
+    return "5"
 st.title('GPT Scanner')
 
 container_style = """
@@ -88,6 +95,16 @@ metric_style = """
     font-size: 1.2rem;
 }
 """
+button_style = """
+.css-b3z5c9    {
+    width: 100%;
+}
+.css-ocqkz7 {
+
+}
+
+"""
+st.markdown(f"<style>{button_style}</style>",unsafe_allow_html=True)
 st.markdown(f"<style>{metric_style}</style>",unsafe_allow_html=True)
 def custom_progress_bar(value):
     
@@ -111,12 +128,12 @@ with st.container():
     textInput, paraphraseText = st.columns(2)
     with textInput:
         question_text_area = st.text_area('Paste content to scan (minimum 100 words for better AI scan):',height=200,max_chars=2000)
-        c1,c2,c3,c4 = st.columns(4)
+        c1,c2,c3 = st.columns(3)
         with c1:
             scan = st.button('🔍 scan for AI')
         with c2:
             plagiarism = st.button("📜 check plagiarism")
-        with c4:
+        with c3:
             if question_text_area:
                 lang = detect(question_text_area)
                 count = sum(1 for c in question_text_area if c in ' \t\n') + 1
@@ -138,9 +155,10 @@ with st.container():
 
 
         st.markdown("<br>",unsafe_allow_html=True)
-        c1,c2,c3,c4 = st.columns(4)
+        c1,c2,c3 = st.columns(3)
         with c1:
             paraphraseButton = st.button('✍🏻 paraphrase text')
+            option = st.selectbox('paraphrase method',('Smart', 'Creative', 'Shorten'))
         with c2:
             rescan = st.button("🔍 rescan for AI",disabled=st.session_state.scan_paraphrased)
         with c3:
@@ -148,7 +166,7 @@ with st.container():
 
 with st.container():
     if plagiarism:
-        if count<15:
+        if count < 15:
             st.error("to check for plagiarism you need to provide 15 word at least!")
         else:
             with st.spinner(random.choice(loading_msgs)):
@@ -168,7 +186,8 @@ with st.container():
         with st.spinner(random.choice(loading_msgs)):
             st.session_state.scan_paraphrased = False
             st.session_state.recheck_plagiarism = False
-            st.session_state.paraphrase = paraphrase(question_text_area,lang=lang)
+            st.session_state.paraphrase = paraphrase(question_text_area,lang=lang, mode=modeToNum())
+            st.session_state.paraphrase = st.session_state.paraphrase.replace("\"","") 
             st.experimental_rerun()
             
     if rescan:    
@@ -176,7 +195,7 @@ with st.container():
             text = st.session_state.paraphrase.replace("<b>","")
             text = text.replace("</b>","")
             text = text.replace("<br>","")
-
+            
             zverdict = get_zero_scan(text)
             if "zverdict" not in st.session_state:
                 st.session_state.zverdict = ZeroVerdictData(
@@ -193,11 +212,10 @@ with st.container():
             st.session_state.zeroGPTVerdictDelta = verdict['ai_percentage'] - st.session_state.zeroGPTVerdict['ai_percentage']
             st.session_state.zeroGPTVerdict = verdict
             
-
-
-
     if reCheckPlagiarism:
         with st.spinner(random.choice(loading_msgs)):
+            if 'plagiarism' not in st.session_state:
+                st.session_state.plagiarism = {"turnitin_index":0}
             text = st.session_state.paraphrase.replace("<b>","")
             text = text.replace("</b>","")
             text = text.replace("<br>","")
@@ -265,4 +283,6 @@ hide_streamlit_style = """
             footer {visibility: hidden;}
             </style>
             """
+
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+
