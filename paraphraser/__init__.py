@@ -23,10 +23,10 @@ def paraphrase(data:str,lang:str)->str:
 
     body = "data="+parser.quote_plus(data)+'+&mode=1&lang='+lang
 
-    LOG.debug(f"post request body: {body}")
+    LOG.info(f"post request body: {body}")
     response = requests.post(url,  headers=headers, data=body)
     LOG.info(f"POST request returned with {response}")
-    LOG.debug(f"response body: {response.text}")
+    LOG.info(f"response body: {response.text}")
 
     response =  response.json()
     paraphrasedText = response["result"]["paraphrase"]
@@ -35,5 +35,5 @@ def paraphrase(data:str,lang:str)->str:
     result = re.findall(regex,paraphrasedText)
     ret = ' '.join(result)
 
-    LOG.debug(f"paraphraser returned with: {ret}")
+    LOG.info(f"paraphraser returned with: {ret}")
     return ret

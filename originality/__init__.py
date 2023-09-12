@@ -58,10 +58,10 @@ class OriginalityAccountData:
                         tab = line.split("::")
                         tab[0] = str(value)
                         print('::'.join(tab), end='') # fileinput prints to the file
-                        LOG.debug(f"found target: updated {ACCOUNTS_PATH} with {line} in setter")
+                        LOG.info(f"found target: updated {ACCOUNTS_PATH} with {line} in setter")
                 else:
                     print(line, end='')
-                    LOG.debug(f"updated {ACCOUNTS_PATH} with {line} in setter")
+                    LOG.info(f"updated {ACCOUNTS_PATH} with {line} in setter")
 
 
 class OriginalityAccount:
@@ -119,7 +119,7 @@ class OriginalityAccount:
         # verify email
         while True:
             sleep(0.5)
-            LOG.debug(f"in true while loop")
+            LOG.info(f"in true while loop")
             try:
                 message_id = mail_client.message_list()[0]['id']
                 message = mail_client.message(message_id)
@@ -135,7 +135,7 @@ class OriginalityAccount:
         # the url return 302
         # so we get the new  location url that has token
         r = client.get(verification_url)
-        LOG.debug(f"{r.status_code} redirected to {r.url}")
+        LOG.info(f"{r.status_code} redirected to {r.url}")
         # r.url is the new url (requests follows redirection by default)
         token = search(r'(?<=\?token=).*', r.url)
         verif = f"{EMAIL_VERIF_URL}?token={token.group(0)}"
@@ -146,11 +146,11 @@ class OriginalityAccount:
         # needs a check here
         acc.active_apikey = OriginalityAccount.__create_api_key(client, acc.access_token)
         if save_account:
-            LOG.debug(f"saving account")
+            LOG.info(f"saving account")
             with open(ACCOUNTS_PATH, 'a+') as f:
                 line = f'{acc.credit_count}::{acc.active_apikey}::{acc.email}::{acc.password}\n'
                 f.write(line)
-                LOG.debug(f"written line {line} in {ACCOUNTS_PATH}")
+                LOG.info(f"written line {line} in {ACCOUNTS_PATH}")
         
         LOG.info(f"account created successfully: {acc}")
         return acc
@@ -162,7 +162,7 @@ class OriginalityAccount:
         })
         r = client.post(CREATE_APIKEY_URL)
 
-        LOG.debug(f"api key creation returned with {r.json()}")
+        LOG.info(f"api key creation returned with {r.json()}")
         return r.json()["api_key"]["api_token"]
     
     @staticmethod
@@ -224,7 +224,7 @@ class OriginalityAccount:
                         password=linetab[3],
                         access_token=""
                     )
-                    LOG.debug(f"returning {ret} as {linetab[0]} >= {min_credits}")
+                    LOG.info(f"returning {ret} as {linetab[0]} >= {min_credits}")
                     return ret
                 line = f.readline()
         LOG.info(f"none of the saved accounts had credits over {min_credits}")
@@ -262,7 +262,7 @@ class OriginalityVerdict:
             LOG.error(f"POST {API_BASE_URL + endpoint} returned {r.text}")
             raise RequestException(f"error: {r.json()['error']}")
         jsonresponse = r.json()
-        LOG.debug(f"Api response: {jsonresponse}")
+        LOG.info(f"Api response: {jsonresponse}")
         res = OriginalityVerdictData(
             public_link= jsonresponse["public_link"],
             ai_score= jsonresponse["ai"]["score"]["ai"] if check_ai else -1,
@@ -314,7 +314,7 @@ class OriginalityVerdict:
             raise RequestException(f"error: {r.json()['error']}")
         jsonresponse = r.json()
 
-        LOG.debug(f"Api response: {jsonresponse}")
+        LOG.info(f"Api response: {jsonresponse}")
         res = OriginalityVerdictData(
             public_link= f"https://app.originality.ai/content-scan/{jsonresponse['scanID']}",
             ai_score= jsonresponse["ai_detection"]["fake"] if check_ai else -1,

@@ -24,10 +24,10 @@ def turnitinPlagaiarsimChecker(data:str,lang:str)->dict:
 
     burp0_data = {"is_free": "false", "plagchecker_locale": lang, "product_paper_type": "1", "title": '', "text": data}
 
-    LOG.debug(f"post request body: {data}")
+    LOG.info(f"post request body: {data}")
     r = requests.post(burp0_url, headers=burp0_headers, cookies=burp0_cookies, data=burp0_data)
     LOG.info(f"POST request returned with {r}")
-    LOG.debug(f"response body: {r.text}")
+    LOG.info(f"response body: {r.text}")
     result = json.loads(r.text)
 
     # result contains word_count:int, percent:str, matches:list[dict]

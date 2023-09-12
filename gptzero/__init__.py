@@ -96,7 +96,7 @@ class ZeroAccount:
         # mail verif
         while True:
             sleep(0.5)
-            LOG.debug(f"in true while loop")
+            LOG.info(f"in true while loop")
             try:
                 message_id = mail_client.message_list()[0]['id']
                 message = mail_client.message(message_id)
@@ -127,11 +127,11 @@ class ZeroAccount:
         LOG.info(f"account created successfully: {acc}")
 
         if save_account:
-            LOG.debug(f"saving account")
+            LOG.info(f"saving account")
             with open(ACCOUNTS_PATH, 'a+') as f:
                 line = f'{acc.email}::{acc.password}\n'
                 f.write(line)
-                LOG.debug(f"written line {line} in {ACCOUNTS_PATH}")
+                LOG.info(f"written line {line} in {ACCOUNTS_PATH}")
                 LOG.info(f"account saved in {ACCOUNTS_PATH}")
         return acc
     
@@ -153,7 +153,7 @@ class ZeroAccount:
                     email=linetab[0],
                     password=linetab[1]
                 )
-                LOG.debug(f"loaded {ret}")
+                LOG.info(f"loaded {ret}")
                 break
             line = f.readline()
         if not ret:
@@ -190,7 +190,7 @@ class ZeroAccount:
         if token:
             ret.authcookie = token
             LOG.info(f"Login successful with account {ret}")
-            LOG.debug(f"cookie returned:\n{token} ")
+            LOG.info(f"cookie returned:\n{token} ")
             return ret
         
         LOG.error(f"No access token in response:\n{r.json()}")
@@ -225,7 +225,7 @@ class ZeroVerdict:
         }
         r = client.post(API_ENDPOINT_URL, json=payload)
         jsonresponse = r.json()
-        LOG.debug(f"Api response: {jsonresponse}")
+        LOG.info(f"Api response: {jsonresponse}")
         
         res = ZeroVerdictData(
             average_generated_prob=jsonresponse["documents"][0]["average_generated_prob"],

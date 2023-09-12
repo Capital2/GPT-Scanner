@@ -29,7 +29,7 @@ def zeroGPTVerdict(text:str)->dict:
     response = requests.post(url,  headers=headers,json=data)
     
     response =  response.json()
-    LOG.debug(f"post to {url} returned with {response}")
+    LOG.info(f"post to {url} returned with {response}")
 
     result = {
         "ai_percentage":response["data"]["fakePercentage"],
