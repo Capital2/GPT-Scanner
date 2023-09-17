@@ -76,6 +76,14 @@ This repository is not associated with or endorsed by providers of the APIs cont
    ```sh
    streamlit run streamlit_app.py
    ```
+## Docker
+After cloning the repo:
+
+1. Build the image
+`docker build -t gpt-scanner .`
+
+2. run the container
+`docker run -dp 0.0.0.0:8501:8501 gpt-scanner`
 
 <!-- CONTRIBUTING -->
 ## Contributing
