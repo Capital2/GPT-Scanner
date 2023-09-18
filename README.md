@@ -83,7 +83,7 @@ After cloning the repo:
 `docker build -t gpt-scanner .`
 
 2. run the container
-`docker run -dp 0.0.0.0:8501:8501 gpt-scanner`
+`docker run -v gpt-scanner-data:/app/data -dp 0.0.0.0:8501:8501 --name gpt-scanner-prod gpt-scanner`
 
 <!-- CONTRIBUTING -->
 ## Contributing
