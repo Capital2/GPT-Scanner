@@ -2,3 +2,4 @@
 data/*accounts.txt
 */__pycache__/
 .vscode/*
+/__pycache__/
