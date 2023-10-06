@@ -13,8 +13,7 @@ def paraphrase(data:str,lang:str,mode:str)->str:
     url = "https://www.paraphraser.io/frontend/rewriteArticleBeta"
     
     session = requests.Session()
-    s = session.get('https://www.paraphraser.io')
-
+    session.get("https://www.paraphraser.io/")
     headers = {
     "User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/118.0",
     "Accept": "application/json, text/javascript, */*; q=0.01",
@@ -27,7 +26,7 @@ def paraphrase(data:str,lang:str,mode:str)->str:
     body = "data="+parser.quote_plus(data)+'+&mode='+mode+'&lang='+lang+'&captcha='
 
     LOG.info(f"post request body: {body}")
-    response = requests.post(url,  headers=headers, data=body, cookies=s.cookies.get_dict())
+    response = session.post(url,  headers=headers, data=body)
     LOG.info(f"POST request returned with {response}")
     LOG.info(f"response body: {response.text}")
 
@@ -43,3 +42,4 @@ def paraphrase(data:str,lang:str,mode:str)->str:
 
     LOG.info(f"paraphraser returned with: {ret}")
     return ret
+print(paraphrase("hello world paraphrase this please hi there","en","5"))
