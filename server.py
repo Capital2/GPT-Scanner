@@ -9,6 +9,7 @@ from gptzero import ZeroAccount, ZeroVerdict, ZeroVerdictData
 from zeroGPT import zeroGPTVerdict
 from paraphraser import paraphrase
 from plagiarism import turnitinPlagaiarsimChecker
+from spellchecker import reverso_spellchecker
 from enum import Enum
 
 class ParaphraserModes(Enum):
@@ -60,6 +61,16 @@ def paraphraser(content: ParaphraserContent):
     if res:
         return {"paraphraser": res}
     raise HTTPException(status_code=500, detail="Something went wrong please check logs")
+
+@app.post("/spellcheck/")
+def post_spellchecker(content: Content):
+
+    inp = jsonable_encoder(content)["content"]
+    res = reverso_spellchecker(inp)
+    if res:
+        return res
+    raise HTTPException(status_code=500, detail="Something went wrong please check logs")
+
 
 class HealthCheck(BaseModel):
     """Response model to validate and return when performing a health check."""
