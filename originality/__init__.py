@@ -1,5 +1,4 @@
 from dataclasses import dataclass, field
-from mailgw_temporary_email import Email
 from time import sleep
 from re import findall, search
 from fake_useragent import UserAgent
@@ -73,7 +72,8 @@ class OriginalityAccount:
         retry_on_exception=lambda e: isinstance(e, RequestException) or isinstance(e, ValueError),
     )
     def create(save_account=True) -> OriginalityAccountData :
-
+        # no mail client
+        return None
         mail_client = Email()
         mail_client.register()
         mail_address = mail_client.address
