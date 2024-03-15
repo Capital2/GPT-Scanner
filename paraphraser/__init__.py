@@ -9,6 +9,7 @@ class Paraphraser():
 
     def __new__(cls):
         if not hasattr(cls, 'instance'):
+            LOG.info("Launched Paraphraser service")
             cls.instance = super(Paraphraser, cls).__new__(cls)
             cls.instance.session = requests.Session()
 
@@ -52,6 +53,8 @@ class Paraphraser():
             result = response.json()['result']
             return self.__parse_content(result)
         elif response.status_code == 419:
+            # if more than twice tnekna
+            LOG.warning("scary recursive call, renewing token ...")
             self.__renew_token()
             return self.paraphrase(data,lang,mode)
         else:
