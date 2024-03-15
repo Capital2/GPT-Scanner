@@ -7,14 +7,17 @@ sys.path.append(os.path.join(os.path.dirname(__file__), os.path.pardir))
 from langdetect import detect
 from gptzero import ZeroAccount, ZeroVerdict, ZeroVerdictData
 from zeroGPT import zeroGPTVerdict
-from paraphraser import paraphrase
+from paraphraser import Paraphraser
 from plagiarism import turnitinPlagaiarsimChecker
 from enum import Enum
 
 class ParaphraserModes(Enum):
-    Creative = 3
-    Smart = 4
-    Shorten = 5
+    Regular = 1
+    Formal = 2
+    TextOptimizer = 3
+    Smarter = 4
+    Creative = 5
+    AiParaphrase = 6
 
 class Content(BaseModel):
     content: str
@@ -23,6 +26,7 @@ class ParaphraserContent(BaseModel):
     content: str
     mode: ParaphraserModes
 
+paraph = Paraphraser()
 app = FastAPI()
 
 @app.post("/gptzero/scan/", response_model=ZeroVerdictData)
@@ -56,7 +60,7 @@ def zero_gpt_scan(content: Content):
 @app.post("/paraphrase/")
 def paraphraser(content: ParaphraserContent):
     inp = jsonable_encoder(content)
-    res = paraphrase(inp["content"], detect(inp["content"]), str(inp["mode"]))
+    res = paraph.paraphrase(inp["content"], detect(inp["content"]), str(inp["mode"]))
     if res:
         return {"paraphraser": res}
     raise HTTPException(status_code=500, detail="Something went wrong please check logs")
